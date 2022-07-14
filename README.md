@@ -1,7 +1,7 @@
 # C3-Histopathology-Cancer-Detection
 
 # Setup
-create virtual python environment in a desired directory and execute:
+create virtual python environment in a desired directory - execute:
 ```bash
 sudo apt-get install -y python3-venv
 python3 -m venv pytorch-venv
