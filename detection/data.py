@@ -39,7 +39,7 @@ def load_competition_from_kaggle(competition,path):
     from kaggle.api.kaggle_api_extended import KaggleApi
     api = KaggleApi()
     api.authenticate()
-    api.competition_download_files(competition, path)
+    api.competition_download_files(competition, path, quiet=False)
     unzip_competition_files(competition,path)
 
 def load_cancer_ds():
