@@ -53,20 +53,20 @@ def load_cancer_ds():
 class CancerDataset(Dataset):
     def __init__(self,path,csvfile,transform = None):
         self.path = path
-        self.labels = pd.read_csv(csvfile)
+        self.labels_frame = pd.read_csv(csvfile)
         self.transform = transform
     
     def __len__(self):
-        return 0
+        return len(self.labels_frame)
     
     def __getitem__(self,idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
         img_name = os.path.join(self.path,
-                                self.labels.iloc[idx, 0]+".tif")
+                                self.labels_frame.iloc[idx, 0]+".tif")
         image = io.imread(img_name)
-        label = self.labels.iloc[idx, 1]
+        label = self.labels_frame.iloc[idx, 1]
 
         sample = {'image': image, 'label': label}
 
