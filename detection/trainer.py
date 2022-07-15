@@ -29,33 +29,34 @@ def get_model(img_shape,normalize):
 def train(model,dataloader,device,batch_size=64,learning_rate=1e-3,epochs=5):
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-    train_loop(model,dataloader,loss_fn,optimizer,device)
+    train_loop(model,dataloader,loss_fn,optimizer,device,epochs)
 
-def train_loop(model,dataloader,loss_fn,optimizer,device):
+def train_loop(model,dataloader,loss_fn,optimizer,device,epochs):
     model = model.to(device)
     size = len(dataloader.dataset)
-    for batch, (X, y) in enumerate(dataloader):
-        # Compute prediction and loss
-        X = X.to(device)
-        y = y.to(device)
-        y = y.view(-1,1).to(torch.float)
-        pred = model(X)
-        loss = loss_fn(pred, y)
+    for epoch in range(epochs):
+        for batch, (X, y) in enumerate(dataloader):
+            # Compute prediction and loss
+            X = X.to(device)
+            y = y.to(device)
+            y = y.view(-1,1).to(torch.float)
+            pred = model(X)
+            loss = loss_fn(pred, y)
 
-        # Backpropagation
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+            # Backpropagation
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
-        print(str(batch),end='\r')
-        if batch % 100 == 0:
-            loss, current = loss.item(), batch * len(X)
-            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
-            wandb.log({"loss":loss})
+            print(str(batch),end='\r')
+            if batch % 100 == 0:
+                loss, current = loss.item(), batch * len(X)
+                print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+                wandb.log({"loss":loss})
     
 
 def run_classifier(trainer_config,model_config):
-    wandb.init(project=trainer_config["project"])
+    wandb.init(project=trainer_config["project"], entity="histo-cancer-detection")
     wandb.config = model_config
     dataloader,img_shape = data.get_dl(batch_size=model_config["batch_size"],num_workers=model_config["num_workers"])
     model = get_model(img_shape,True)
