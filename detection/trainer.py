@@ -26,16 +26,18 @@ import wandb
 def get_model(img_shape,normalize):
     return model.Classifier(img_shape,normalize)
 
-def train(model,dataloader,batch_size=64,learning_rate=1e-3,epochs=5):
+def train(model,dataloader,device,batch_size=64,learning_rate=1e-3,epochs=5):
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-    train_loop(model,dataloader,loss_fn,optimizer)
+    train_loop(model,dataloader,loss_fn,optimizer,device)
 
-def train_loop(model,dataloader,loss_fn,optimizer):
-
+def train_loop(model,dataloader,loss_fn,optimizer,device):
+    model = model.to(device)
     size = len(dataloader.dataset)
     for batch, (X, y) in enumerate(dataloader):
         # Compute prediction and loss
+        X = X.to(device)
+        y = y.to(device)
         y = y.view(-1,1).to(torch.float)
         pred = model(X)
         loss = loss_fn(pred, y)
@@ -45,6 +47,7 @@ def train_loop(model,dataloader,loss_fn,optimizer):
         loss.backward()
         optimizer.step()
 
+        print(str(batch),end='\r')
         if batch % 100 == 0:
             loss, current = loss.item(), batch * len(X)
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
@@ -57,7 +60,8 @@ def run_classifier(trainer_config,model_config):
     dataloader,img_shape = data.get_dl(batch_size=model_config["batch_size"],num_workers=model_config["num_workers"])
     model = get_model(img_shape,True)
     wandb.watch(model)
-    train (model,dataloader,batch_size=model_config["batch_size"],learning_rate=model_config["learning_rate"],epochs=model_config["max_epochs"])
+    print(trainer_config["device"])
+    train (model,dataloader, trainer_config["device"],batch_size=model_config["batch_size"],learning_rate=model_config["learning_rate"],epochs=model_config["max_epochs"])
 
 # decreases logging for better performance! mostly relevant for small dsets
 PERFORMANCE_MODE = False
@@ -66,18 +70,14 @@ PRJ = "histo_cancer"
 MODEL_CONFIG = dict(
     batch_size = 64,
     num_workers = 4,
-    learning_rate = 1e-3,
+    learning_rate = 0.01,
     max_epochs=100,
 )
 
 GPUS = 1
 TRAINER_CONFIG = dict(
     project = PRJ,
-    gpus=GPUS,
-    strategy="ddp" if GPUS > 1 else None,
-    fast_dev_run=False,
-    log_every_n_steps=250 if PERFORMANCE_MODE else 100,
-    accumulate_grad_batches=1
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
 )
 
 if __name__ == "__main__":
