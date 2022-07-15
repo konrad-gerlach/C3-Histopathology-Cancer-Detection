@@ -19,6 +19,7 @@ import pandas as pd
 from torch import nn
 import model
 import data
+import wandb
 
 #https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
 
@@ -47,15 +48,37 @@ def train_loop(model,dataloader,loss_fn,optimizer):
         if batch % 100 == 0:
             loss, current = loss.item(), batch * len(X)
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+            wandb.log({"loss":loss})
     
 
-def run_classifier():
-    batch_size = 64
-    num_workers = 4
-    dataloader = data.get_dl(batch_size=batch_size,num_workers=num_workers)
-    model = get_model([3,96,96],True)
-    train (model,dataloader,batch_size=batch_size,learning_rate=1e-3,epochs=5)
+def run_classifier(trainer_config,model_config):
+    wandb.init(project=trainer_config["project"])
+    wandb.config = model_config
+    dataloader,img_shape = data.get_dl(batch_size=model_config["batch_size"],num_workers=model_config["num_workers"])
+    model = get_model(img_shape,True)
+    wandb.watch(model)
+    train (model,dataloader,batch_size=model_config["batch_size"],learning_rate=model_config["learning_rate"],epochs=model_config["max_epochs"])
 
+# decreases logging for better performance! mostly relevant for small dsets
+PERFORMANCE_MODE = False
+PRJ = "histo_cancer"
+
+MODEL_CONFIG = dict(
+    batch_size = 64,
+    num_workers = 4,
+    learning_rate = 1e-3,
+    max_epochs=100,
+)
+
+GPUS = 1
+TRAINER_CONFIG = dict(
+    project = PRJ,
+    gpus=GPUS,
+    strategy="ddp" if GPUS > 1 else None,
+    fast_dev_run=False,
+    log_every_n_steps=250 if PERFORMANCE_MODE else 100,
+    accumulate_grad_batches=1
+)
 
 if __name__ == "__main__":
-    run_classifier()
+    run_classifier(TRAINER_CONFIG,MODEL_CONFIG)

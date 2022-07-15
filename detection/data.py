@@ -83,11 +83,11 @@ def get_ds():
     ds = CancerDataset(os.path.join(ds_path, "train"),os.path.join(ds_path, "train_labels.csv"), transforms)
     return ds
 
-def get_dl(batch_size,num_workers):
+def get_dl(batch_size,num_workers,pin_memory=True):
     ds = get_ds()
-    dl = DataLoader(ds, batch_size=batch_size,shuffle=True, num_workers=num_workers)
-    return dl
-
+    img_shape = ds[0][0].shape
+    dl = DataLoader(ds, batch_size=batch_size,shuffle=True, num_workers=num_workers,pin_memory=pin_memory)
+    return dl, img_shape
 
 if __name__ == "__main__":
     ds = get_ds()
