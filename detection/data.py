@@ -68,21 +68,23 @@ class CancerDataset(Dataset):
         image = io.imread(img_name)
         label = self.labels_frame.iloc[idx, 1]
 
-        sample = {'image': image, 'label': label}
-
         if self.transform:
-            sample = self.transform(sample)
+            image = self.transform(image)
+
+
+        sample = {'image': image, 'label': label}
 
         return sample
 
 
 def get_ds():
     load_cancer_ds()
-    return CancerDataset(os.path.join(ds_path, "train"),"datasets/cancer/train_labels.csv")
+    transforms = torchvision.transforms.Compose([torchvision.transforms.ToTensor(), torchvision.transforms.Resize([96,96])])
+    return CancerDataset(os.path.join(ds_path, "train"),os.path.join(ds_path, "train_labels.csv"), transforms)
 
 if __name__ == "__main__":
     ds = get_ds()
     sample = ds.__getitem__(0)
     print(sample["label"])
-    plt.imshow(sample["image"])
+    plt.imshow(torchvision.transforms.ToPILImage()(sample["image"]))
     plt.show()
