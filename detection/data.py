@@ -72,7 +72,7 @@ class CancerDataset(Dataset):
             image = self.transform(image)
 
 
-        sample = {'image': image, 'label': label}
+        sample = [image,label]
 
         return sample
 
