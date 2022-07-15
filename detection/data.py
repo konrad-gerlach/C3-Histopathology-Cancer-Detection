@@ -80,7 +80,14 @@ class CancerDataset(Dataset):
 def get_ds():
     load_cancer_ds()
     transforms = torchvision.transforms.Compose([torchvision.transforms.ToTensor(), torchvision.transforms.Resize([96,96])])
-    return CancerDataset(os.path.join(ds_path, "train"),os.path.join(ds_path, "train_labels.csv"), transforms)
+    ds = CancerDataset(os.path.join(ds_path, "train"),os.path.join(ds_path, "train_labels.csv"), transforms)
+    return ds
+
+def get_dl(batch_size,num_workers):
+    ds = get_ds()
+    dl = DataLoader(ds, batch_size=batch_size,shuffle=True, num_workers=num_workers)
+    return dl
+
 
 if __name__ == "__main__":
     ds = get_ds()
