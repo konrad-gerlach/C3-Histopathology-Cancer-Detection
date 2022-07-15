@@ -51,9 +51,10 @@ def load_cancer_ds():
 
 #https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
 class CancerDataset(Dataset):
-    def __init__(self,path,csvfile):
+    def __init__(self,path,csvfile,transform = None):
         self.path = path
         self.labels = pd.read_csv(csvfile)
+        self.transform = transform
     
     def __len__(self):
         return 0
@@ -62,13 +63,12 @@ class CancerDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        img_name = os.path.join(self.root_dir,
-                                self.landmarks_frame.iloc[idx, 0])
+        img_name = os.path.join(self.path,
+                                self.labels.iloc[idx, 0]+".tif")
         image = io.imread(img_name)
-        landmarks = self.landmarks_frame.iloc[idx, 1:]
-        landmarks = np.array([landmarks])
-        landmarks = landmarks.astype('float').reshape(-1, 2)
-        sample = {'image': image, 'landmarks': landmarks}
+        label = self.labels.iloc[idx, 1]
+
+        sample = {'image': image, 'label': label}
 
         if self.transform:
             sample = self.transform(sample)
@@ -78,7 +78,11 @@ class CancerDataset(Dataset):
 
 def get_ds():
     load_cancer_ds()
-    return
+    return CancerDataset(os.path.join(ds_path, "train"),"datasets/cancer/train_labels.csv")
 
 if __name__ == "__main__":
-    get_ds()
+    ds = get_ds()
+    sample = ds.__getitem__(0)
+    print(sample["label"])
+    plt.imshow(sample["image"])
+    plt.show()
