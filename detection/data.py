@@ -76,7 +76,7 @@ class CancerDataset(Dataset):
         if self.transform:
             image = self.transform(image)
 
-        sample = {'image': image, 'label': label}
+        sample = [image, label]
 
         return sample
 
@@ -99,6 +99,6 @@ def get_dl(batch_size, num_workers, pin_memory=True):
 if __name__ == "__main__":
     ds = get_ds()
     sample = ds.__getitem__(0)
-    print(sample['label'])
-    plt.imshow(torchvision.transforms.ToPILImage()(sample['image']))
+    print(sample[1])
+    plt.imshow(torchvision.transforms.ToPILImage()(sample[0]))
     plt.show()
