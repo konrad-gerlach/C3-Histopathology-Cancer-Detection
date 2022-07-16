@@ -25,7 +25,7 @@ import wandb
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
 
 def get_model(img_shape, normalize):
-    return model.Classifier(img_shape, normalize)
+    return model.Model1()
 
 
 def train(model, dataloader, device, batch_size=64, learning_rate=1e-3, epochs=5):
