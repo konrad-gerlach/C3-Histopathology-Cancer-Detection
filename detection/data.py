@@ -85,15 +85,25 @@ def get_ds():
     load_cancer_ds()
     transforms = torchvision.transforms.Compose(
         [torchvision.transforms.ToTensor(), torchvision.transforms.Resize([96, 96])])
-    ds = CancerDataset(os.path.join(ds_path, "train"), os.path.join(ds_path, "train_labels.csv"), transforms)
-    return ds
+    full_ds = CancerDataset(os.path.join(ds_path, "train"), os.path.join(ds_path, "train_labels.csv"), transforms)
+    train_ds, test_ds = split_ds(full_ds)
+    return train_ds, test_ds
+
+def split_ds(full_ds):
+    train_portion = 0.99
+    train_size = int(train_portion * len(full_ds))
+    test_size = len(full_ds) - train_size
+
+    train_ds, test_ds = torch.utils.data.random_split(full_ds, [train_size, test_size])
+    return train_ds, test_ds
 
 
 def get_dl(batch_size, num_workers, pin_memory=True):
-    ds = get_ds()
-    img_shape = ds[0][0].shape
-    dl = DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
-    return dl, img_shape
+    train_ds, test_ds = get_ds()
+    img_shape = train_ds[0][0].shape
+    train_dl = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
+    test_dl = DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory)
+    return train_dl, test_dl, img_shape
 
 
 if __name__ == "__main__":
