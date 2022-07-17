@@ -27,29 +27,11 @@ import wandb
 def get_model(img_shape, normalize):
     return model.Model1()
 
-# https://github.com/erykml/medium_articles/blob/master/Computer%20Vision/lenet5_pytorch.ipynb
-def get_accuracy(model, data_loader, device):
-    '''
-    Function for computing the accuracy of the predictions over the entire data_loader
-    '''
-    
-    correct_pred = 0 
-    n = 0
-    
-    with torch.no_grad():
-        model.eval()
-        for X, y_true in data_loader:
+def predicted_lables(pred):
+    pred = torch.sigmoid(pred)
+    pred = torch.round(pred, decimals=0)
+    return pred
 
-            X = X.to(device)
-            y_true = y_true.to(device)
-
-            _, y_prob = model(X)
-            _, predicted_labels = torch.max(y_prob, 1)
-
-            n += y_true.size(0)
-            correct_pred += (predicted_labels == y_true).sum()
-
-    return correct_pred.float() / n
 
 def train(model, train_dataloader, test_dataloader, device, batch_size=64, learning_rate=1e-3, epochs=5):
     loss_fn = nn.BCEWithLogitsLoss()
@@ -61,11 +43,12 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
     model = model.to(device)
     size = len(train_dataloader.dataset)
 
-    batch_limit=10
+    #to be set
+    batch_limit=20
     batch_limit -= 1
 
     for epoch in range(epochs):
-        #metric = torch.Accumulator(3)
+        acc_accum = 0
         train_iter = enumerate(train_dataloader)
         train_epoch_loss = 0        
 
@@ -76,7 +59,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
             y = y.view(-1, 1).to(torch.float)
 
             pred = model(X)
-            loss = loss_fn(pred, y)
+            loss = loss_fn(pred, y) #does this work without sigmoid on pred?
             train_epoch_loss += loss
 
             # Backpropagation
@@ -84,24 +67,35 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
             loss.backward()
             optimizer.step()
 
-            #with torch.no_grad():
-
+            pred = predicted_lables(pred) 
+            acc_accum += (pred == y).sum()       
 
             print(str(batch), end='\r')
+
+
+            # loss and accuracy for some batches
             if batch % 5 == 0:
-                loss, current = loss.item(), batch * len(X)
-                print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+                loss  = loss.item()
+                current = batch * len(X)
+                train_acc = acc_accum / (current + len(X))
+                print(f"train loss: {loss:>7f} train accuracy: {train_acc:>7f} [{current:>5d}/{size:>5d}]")
                 wandb.log({"loss": loss})
+                wandb.log({"train accuracy per batch": train_acc})
 
             if batch == batch_limit:
                 break
-
+        
+        # loss while training
         train_epoch_loss /= batch_limit
         wandb.log({"train loss per epoch": train_epoch_loss})
         print('epoch {}, train loss {}'.format(epoch+1,  train_epoch_loss))
 
-        #get test loss https://colab.research.google.com/drive/1LHDUxiuG1niSOTiK9vRBlX47403OI15H?authuser=1#scrollTo=yoek_AxoQiNg
+        # test loss and accuracy
+        # https://colab.research.google.com/drive/1LHDUxiuG1niSOTiK9vRBlX47403OI15H?authuser=1#scrollTo=yoek_AxoQiNg
         model.eval()
+        correct_pred = 0 
+        n = 0
+
         with torch.no_grad():
             test_loss_epoch = 0.0
             test_iter = enumerate(test_dataloader)
@@ -110,13 +104,21 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
                 y_test = y_test.to(device)
                 y_test = y_test.view(-1, 1).to(torch.float)
 
+                pred_test = model(X_test)
+
                 batch_loss = loss_fn(model(X_test), y_test) 
                 test_loss_epoch += batch_loss
 
+                pred_lables_test = predicted_lables(pred_test)
+                n += len(y_test)
+                correct_pred += (pred_lables_test == y_test).sum()          
+
             test_loss_epoch /= len(test_dataloader)
-            
+            epoch_acc = correct_pred / n
+
         wandb.log({"test loss per epoch": test_loss_epoch})
-        print('epoch {}, test loss {}'.format(epoch+1, test_loss_epoch))
+        wandb.log({"test accuracy per epoch": epoch_acc})
+        print('epoch {}, test loss {}, accuracy {}'.format(epoch+1, test_loss_epoch, epoch_acc))
 
 
 def run_classifier(trainer_config, model_config):
@@ -138,7 +140,7 @@ MODEL_CONFIG = dict(
     batch_size=64,
     num_workers=4,
     learning_rate=0.01,
-    max_epochs=3
+    max_epochs=10
 )
 
 GPUS = 1
