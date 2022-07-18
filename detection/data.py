@@ -108,9 +108,31 @@ DATA_CONFIG = dict(
 )
 
 
+def show(images, labels):    
+    # Here _ means that we ignore (not use) variables
+    _, figs = plt.subplots(1, len(images), figsize=(200, 200))
+    for f, img, lbl in zip(figs, images, labels):
+        f.imshow(torchvision.transforms.ToPILImage()(img))
+        if lbl == 0:
+            lbl = 'No Cancer'
+        else:
+            lbl = 'Cancer'
+        f.set_title(lbl)
+        f.axes.get_xaxis().set_visible(False)
+        f.axes.get_yaxis().set_visible(False)
+
 if __name__ == "__main__":
-    ds = get_ds()
-    sample = ds.__getitem__(0)
-    print(sample[1])
-    plt.imshow(torchvision.transforms.ToPILImage()(sample[0][0]))
+    train_dataloader, test_dataloader, img_shape = get_dl(batch_size=4, num_workers=4)
+    a = enumerate(train_dataloader)
+
+    for batch, (X, y) in a:
+        show(X,y)
+        if batch == 1:
+            break
     plt.show()
+
+
+    #ds = get_ds()
+    #print_img(ds)
+    
+
