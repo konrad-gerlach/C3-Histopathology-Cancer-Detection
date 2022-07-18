@@ -39,10 +39,6 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
     model = model.to(device)
     size = len(train_dataloader.dataset)
 
-    #to be set
-    batch_limit=20
-    batch_limit -= 1
-
     for epoch in range(epochs):
         acc_accum = 0
         train_iter = enumerate(train_dataloader)
@@ -55,7 +51,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
             y = y.view(-1, 1).to(torch.float)
 
             pred = model(X)
-            loss = loss_fn(pred, y) #does this work without sigmoid on pred?
+            loss = loss_fn(pred, y)
             train_epoch_loss += loss
 
             # Backpropagation
@@ -77,12 +73,9 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
                 print(f"train loss: {loss:>7f} train accuracy: {train_acc:>7f} [{current:>5d}/{size:>5d}]")
                 wandb.log({"loss": loss})
                 wandb.log({"train accuracy per batch": train_acc})
-
-            if batch == batch_limit:
-                break
         
         # loss while training
-        train_epoch_loss /= batch_limit
+        train_epoch_loss /= batch + 1
         wandb.log({"train loss per epoch": train_epoch_loss})
         print('epoch {}, train loss {}'.format(epoch+1,  train_epoch_loss))
 
