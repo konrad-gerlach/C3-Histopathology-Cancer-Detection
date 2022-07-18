@@ -29,11 +29,21 @@ def get_model(img_shape, normalize):
     return model.Model1()
 
 
-def train(model, train_dataloader, test_dataloader, device, learning_rate=1e-3, epochs=5, adam_config=None):
+def train(model, train_dataloader, test_dataloader, optimizer_config, device, learning_rate=1e-3, epochs=5):
     loss_fn = nn.BCEWithLogitsLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-    if adam_config is not None and adam_config["use_adam"]:
-        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, betas=adam_config["betas"], eps=adam_config["eps"], weight_decay=adam_config["weight_decay"], amsgrad=adam_config["amsgrad"])
+    if optimizer_config["use_optimizer"] == "adam":
+        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, betas=optimizer_config["betas"], eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"], amsgrad=optimizer_config["amsgrad"])
+    elif optimizer_config["use_optimizer"] == "adadelta":
+        optimizer = torch.optim.Adadelta(model.parameters(), lr=learning_rate, rho=optimizer_config["rho"], eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"])
+    elif optimizer_config["use_optimizer"] == "adagrad":
+        optimizer = torch.optim.Adagrad(model.parameters(), lr=learning_rate, lr_decay=optimizer_config["lr_decay"], weight_decay=optimizer_config["weight_decay"])
+    elif optimizer_config["use_optimizer"] == "rmsprop":
+        optimizer = torch.optim.RMSprop(model.parameters(), lr=learning_rate, alpha=optimizer_config["alpha"], eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"], momentum=optimizer_config["momentum"])
+    elif optimizer_config["use_optimizer"] == "sgd":
+        optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=optimizer_config["momentum"], weight_decay=optimizer_config["weight_decay"])
+    else:
+        optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+    
     print("You are currently using the optimizer: {}".format(optimizer))
     train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, device, epochs)
 
@@ -85,15 +95,15 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
         test_loop(model, test_dataloader, loss_fn, device, epoch)
 
 
-def run_classifier(trainer_config, model_config, adam_config):
+def run_classifier(trainer_config, model_config, optimizer_config):
     wandb.init(project=trainer_config["project"], entity="histo-cancer-detection")
     wandb.config = model_config
     train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=model_config["batch_size"], num_workers=model_config["num_workers"])
     model = get_model(img_shape, True)
     wandb.watch(model)
     print(trainer_config["device"])
-    train(model, train_dataloader, test_dataloader, trainer_config["device"],
-          learning_rate=model_config["learning_rate"], epochs=model_config["max_epochs"], adam_config=adam_config)
+    train(model, train_dataloader, test_dataloader, optimizer_config, trainer_config["device"],
+          learning_rate=model_config["learning_rate"], epochs=model_config["max_epochs"])
 
 
 # decreases logging for better performance! mostly relevant for small dsets
@@ -107,12 +117,19 @@ MODEL_CONFIG = dict(
     max_epochs=10,
 )
 
-ADAM_CONFIG = dict(
-    use_adam = False,
-    betas= (0.9, 0.999),
+#supports adam, adadelta, rmsprop, adagrad, sgd (with weight decay and momentum)
+#if none is selected, sgd is used
+#https://pytorch.org/docs/stable/optim.html
+OPTIMIZER_CONFIG = dict(
+    use_optimizer = "sgd", 
+    alpha = 0.99, #For RmsProp
+    betas= (0.9, 0.999), #For Adam
+    rho=0.9, #For Adadelta
     eps=1e-08,
     weight_decay=0.01,
     amsgrad=False,
+    momentum=0.1,
+    lr_decay=0.1,
 )
 
 GPUS = 1
@@ -122,4 +139,4 @@ TRAINER_CONFIG = dict(
 )
 
 if __name__ == "__main__":
-    run_classifier(TRAINER_CONFIG, MODEL_CONFIG, ADAM_CONFIG)
+    run_classifier(TRAINER_CONFIG, MODEL_CONFIG, OPTIMIZER_CONFIG)
