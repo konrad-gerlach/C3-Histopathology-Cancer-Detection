@@ -1,9 +1,10 @@
 from __future__ import print_function, division
 from data import get_dl, get_ds
+from test import test_loop
+from helper import predicted_lables
 import zipfile
 import torchvision
 import os
-import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
@@ -26,11 +27,6 @@ import wandb
 
 def get_model(img_shape, normalize):
     return model.Model1()
-
-def predicted_lables(pred):
-    pred = torch.sigmoid(pred)
-    pred = torch.round(pred, decimals=0)
-    return pred
 
 
 def train(model, train_dataloader, test_dataloader, device, batch_size=64, learning_rate=1e-3, epochs=5):
@@ -90,35 +86,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
         wandb.log({"train loss per epoch": train_epoch_loss})
         print('epoch {}, train loss {}'.format(epoch+1,  train_epoch_loss))
 
-        # test loss and accuracy
-        # https://colab.research.google.com/drive/1LHDUxiuG1niSOTiK9vRBlX47403OI15H?authuser=1#scrollTo=yoek_AxoQiNg
-        model.eval()
-        correct_pred = 0 
-        n = 0
-
-        with torch.no_grad():
-            test_loss_epoch = 0.0
-            test_iter = enumerate(test_dataloader)
-            for batch, (X_test, y_test) in test_iter:
-                X_test = X_test.to(device)
-                y_test = y_test.to(device)
-                y_test = y_test.view(-1, 1).to(torch.float)
-
-                pred_test = model(X_test)
-
-                batch_loss = loss_fn(model(X_test), y_test) 
-                test_loss_epoch += batch_loss
-
-                pred_lables_test = predicted_lables(pred_test)
-                n += len(y_test)
-                correct_pred += (pred_lables_test == y_test).sum()          
-
-            test_loss_epoch /= len(test_dataloader)
-            epoch_acc = correct_pred / n
-
-        wandb.log({"test loss per epoch": test_loss_epoch})
-        wandb.log({"test accuracy per epoch": epoch_acc})
-        print('epoch {}, test loss {}, accuracy {}'.format(epoch+1, test_loss_epoch, epoch_acc))
+        test_loop(model, test_dataloader, loss_fn, device, epoch)
 
 
 def run_classifier(trainer_config, model_config):

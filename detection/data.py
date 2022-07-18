@@ -12,7 +12,6 @@ from torchvision.datasets import MNIST
 from torch.utils.data import Dataset, DataLoader
 from kaggle.api.kaggle_api_extended import KaggleApi
 from skimage import io, transform
-import torch
 import os
 import pandas as pd
 
@@ -90,8 +89,7 @@ def get_ds():
     return train_ds, test_ds
 
 def split_ds(full_ds):
-    train_portion = 0.99
-    train_size = int(train_portion * len(full_ds))
+    train_size = int(DATA_CONFIG["train_portion"] * len(full_ds))
     test_size = len(full_ds) - train_size
 
     train_ds, test_ds = torch.utils.data.random_split(full_ds, [train_size, test_size])
@@ -105,10 +103,14 @@ def get_dl(batch_size, num_workers, pin_memory=True):
     test_dl = DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory)
     return train_dl, test_dl, img_shape
 
+DATA_CONFIG = dict(
+    train_portion = 0.99
+)
+
 
 if __name__ == "__main__":
     ds = get_ds()
     sample = ds.__getitem__(0)
     print(sample[1])
-    plt.imshow(torchvision.transforms.ToPILImage()(sample[0]))
+    plt.imshow(torchvision.transforms.ToPILImage()(sample[0][0]))
     plt.show()
