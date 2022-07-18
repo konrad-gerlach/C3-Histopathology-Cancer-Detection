@@ -29,9 +29,12 @@ def get_model(img_shape, normalize):
     return model.Model1()
 
 
-def train(model, train_dataloader, test_dataloader, device, batch_size=64, learning_rate=1e-3, epochs=5):
+def train(model, train_dataloader, test_dataloader, device, learning_rate=1e-3, epochs=5, adam_config=None):
     loss_fn = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+    if adam_config is not None and adam_config["use_adam"]:
+        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, betas=adam_config["betas"], eps=adam_config["eps"], weight_decay=adam_config["weight_decay"], amsgrad=adam_config["amsgrad"])
+    print("You are currently using the optimizer: {}".format(optimizer))
     train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, device, epochs)
 
 
@@ -82,15 +85,15 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
         test_loop(model, test_dataloader, loss_fn, device, epoch)
 
 
-def run_classifier(trainer_config, model_config):
+def run_classifier(trainer_config, model_config, adam_config):
     wandb.init(project=trainer_config["project"], entity="histo-cancer-detection")
     wandb.config = model_config
     train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=model_config["batch_size"], num_workers=model_config["num_workers"])
     model = get_model(img_shape, True)
     wandb.watch(model)
     print(trainer_config["device"])
-    train(model, train_dataloader, test_dataloader, trainer_config["device"], batch_size=model_config["batch_size"],
-          learning_rate=model_config["learning_rate"], epochs=model_config["max_epochs"])
+    train(model, train_dataloader, test_dataloader, trainer_config["device"],
+          learning_rate=model_config["learning_rate"], epochs=model_config["max_epochs"], adam_config=adam_config)
 
 
 # decreases logging for better performance! mostly relevant for small dsets
@@ -101,7 +104,15 @@ MODEL_CONFIG = dict(
     batch_size=64,
     num_workers=4,
     learning_rate=0.01,
-    max_epochs=10
+    max_epochs=10,
+)
+
+ADAM_CONFIG = dict(
+    use_adam = False,
+    betas= (0.9, 0.999),
+    eps=1e-08,
+    weight_decay=0.01,
+    amsgrad=False,
 )
 
 GPUS = 1
@@ -111,4 +122,4 @@ TRAINER_CONFIG = dict(
 )
 
 if __name__ == "__main__":
-    run_classifier(TRAINER_CONFIG, MODEL_CONFIG)
+    run_classifier(TRAINER_CONFIG, MODEL_CONFIG, ADAM_CONFIG)
