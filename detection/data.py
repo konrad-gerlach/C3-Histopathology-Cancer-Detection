@@ -15,6 +15,7 @@ from kaggle.api.kaggle_api_extended import KaggleApi
 from skimage import io, transform
 import os
 import pandas as pd
+import config
 
 ds_path = 'datasets/cancer'
 
@@ -90,8 +91,8 @@ def get_ds():
     return train_ds, test_ds
 
 def split_ds(full_ds):
-    train_size = int(DATA_CONFIG["train_portion"] * len(full_ds))
-    test_size = int(DATA_CONFIG["test_portion"] * len(full_ds))
+    train_size = int(config.DATA_CONFIG["train_portion"] * len(full_ds))
+    test_size = int(config.DATA_CONFIG["test_portion"] * len(full_ds))
     remainder = len(full_ds) - train_size
     train_ds, remainder_ds = torch.utils.data.random_split(full_ds, [train_size, remainder])
     test_ds, remainder_ds = torch.utils.data.random_split(remainder_ds, [test_size, remainder-test_size])
@@ -104,11 +105,6 @@ def get_dl(batch_size, num_workers, pin_memory=True):
     train_dl = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
     test_dl = DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory)
     return train_dl, test_dl, img_shape
-
-DATA_CONFIG = dict(
-    train_portion = 0.05,
-    test_portion = 0.01
-)
 
 
 def show(images, labels):    
@@ -133,9 +129,5 @@ if __name__ == "__main__":
         if batch == 1:
             break
     plt.show()
-
-
-    #ds = get_ds()
-    #print_img(ds)
     
 

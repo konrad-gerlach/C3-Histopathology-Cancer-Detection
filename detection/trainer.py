@@ -21,6 +21,7 @@ from torch import nn
 import model
 import data
 import wandb
+import config
 
 
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
@@ -121,35 +122,9 @@ def run_classifier(trainer_config, model_config, optimizer_config):
 
 # decreases logging for better performance! mostly relevant for small dsets
 PERFORMANCE_MODE = False
-PRJ = "histo_cancer"
-
-MODEL_CONFIG = dict(
-    batch_size=64,
-    num_workers=4,
-    learning_rate=0.01,
-    max_epochs=10,
-)
-
-#supports adam, adadelta, rmsprop, adagrad, sgd (with weight decay and momentum)
-#if none is selected, sgd is used
-#https://pytorch.org/docs/stable/optim.html
-OPTIMIZER_CONFIG = dict(
-    use_optimizer = "sgd", 
-    alpha = 0.99, #For RmsProp
-    betas= (0.9, 0.999), #For Adam
-    rho=0.9, #For Adadelta
-    eps=1e-08,
-    weight_decay=0.01,
-    amsgrad=False,
-    momentum=0.1,
-    lr_decay=0.1,
-)
 
 GPUS = 1
-TRAINER_CONFIG = dict(
-    project=PRJ,
-    device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
-)
+
 
 if __name__ == "__main__":
-    run_classifier(TRAINER_CONFIG, MODEL_CONFIG, OPTIMIZER_CONFIG)
+    run_classifier(config.TRAINER_CONFIG, config.MODEL_CONFIG, config.OPTIMIZER_CONFIG)
