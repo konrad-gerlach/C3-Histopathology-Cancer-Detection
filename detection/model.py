@@ -36,16 +36,24 @@ class Model1(nn.Module):
         out = self.fc2(out)
         return out
 
-    def print_layers(self):
+    def get_layers(self):
+        output = "Model summary:\n"
         X = torch.rand(size=(1, 3, 96, 96), dtype=torch.float32)
-        print("layer1:")
+        
+        output += "layer1:\n"        
         for layer in self.layer1:
             X = layer(X)
-            print(layer.__class__.__name__, 'output shape: \t', X.shape)
-        print("layer2:")
+            output += (layer.__class__.__name__ + 'output shape: \t' + str(X.shape) +'\n')
+
+        output += "layer2:\n"
         for layer in self.layer2:
             X = layer(X)
-            print(layer.__class__.__name__, 'output shape: \t', X.shape)
+            output += (layer.__class__.__name__ + 'output shape: \t' + str(X.shape) + '\n')
+
+        return output
+    
+    def print_layers(self):
+        print(model1.get_layers())
 
 
 if __name__ == "__main__":

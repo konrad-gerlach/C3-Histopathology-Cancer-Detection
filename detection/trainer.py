@@ -28,6 +28,18 @@ import wandb
 def get_model(img_shape, normalize):
     return model.Model1()
 
+def log_model(conv_model):
+    columns = ["Text"]
+    data = []
+
+    lines = conv_model.get_layers().split("\n")
+    for line in lines:
+        data.append([line])
+
+    table =  wandb.Table(data=data, columns=columns)
+    wandb.log({"The model we use": table}) 
+
+
 
 def train(model, train_dataloader, test_dataloader, device, batch_size=64, learning_rate=1e-3, epochs=5):
     loss_fn = nn.BCEWithLogitsLoss()
@@ -87,6 +99,7 @@ def run_classifier(trainer_config, model_config):
     wandb.config = model_config
     train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=model_config["batch_size"], num_workers=model_config["num_workers"])
     model = get_model(img_shape, True)
+    log_model(model)
     wandb.watch(model)
     print(trainer_config["device"])
     train(model, train_dataloader, test_dataloader, trainer_config["device"], batch_size=model_config["batch_size"],
@@ -101,7 +114,7 @@ MODEL_CONFIG = dict(
     batch_size=64,
     num_workers=4,
     learning_rate=0.01,
-    max_epochs=10
+    max_epochs=2
 )
 
 GPUS = 1
