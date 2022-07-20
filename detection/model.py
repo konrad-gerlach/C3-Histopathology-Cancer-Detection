@@ -8,7 +8,7 @@ import torchvision
 
 class Small_LeNet(nn.Module):
     def __init__(self, num_classes=1):
-        super(Model1, self).__init__()
+        super(Small_LeNet, self).__init__()
         self.layer1 = nn.Sequential(
             nn.Conv2d(3, 6, kernel_size=5, stride=1, padding=0),
             nn.BatchNorm2d(6),
