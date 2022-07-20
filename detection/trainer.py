@@ -1,4 +1,5 @@
 from __future__ import print_function, division
+import logging
 from data import get_dl, get_ds
 from test import test_loop
 from helper import predicted_lables
@@ -40,24 +41,37 @@ def log_model(conv_model):
     table =  wandb.Table(data=data, columns=columns)
     wandb.log({"The model we use": table}) 
 
+def log_metadata(model_config, optimizer):
+    lines = str(optimizer).split("\n")
+    logging_config = dict(
+        batch_size= model_config["batch_size"],
+        learning_rate= model_config["learning_rate"],
+        max_epochs= model_config["max_epochs"],
+        train_portion=config.DATA_CONFIG["train_portion"],
+        test_portion=config.DATA_CONFIG["test_portion"],
+        optimizer= lines[0].split(" ")[0],
+        optimizer_parameters= lines[1:-1],
+    )
+    return logging_config
 
+def choose_optimizer(optimizer_config, parameters, learning_rate=1e-3):
+    use_optimizer= optimizer_config["use_optimizer"].lower()
 
-def train(model, train_dataloader, test_dataloader, optimizer_config, device, learning_rate=1e-3, epochs=5):
-    loss_fn = nn.BCEWithLogitsLoss()
-    if optimizer_config["use_optimizer"] == "adam":
-        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, betas=optimizer_config["betas"], eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"], amsgrad=optimizer_config["amsgrad"])
-    elif optimizer_config["use_optimizer"] == "adadelta":
-        optimizer = torch.optim.Adadelta(model.parameters(), lr=learning_rate, rho=optimizer_config["rho"], eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"])
-    elif optimizer_config["use_optimizer"] == "adagrad":
-        optimizer = torch.optim.Adagrad(model.parameters(), lr=learning_rate, lr_decay=optimizer_config["lr_decay"], weight_decay=optimizer_config["weight_decay"])
-    elif optimizer_config["use_optimizer"] == "rmsprop":
-        optimizer = torch.optim.RMSprop(model.parameters(), lr=learning_rate, alpha=optimizer_config["alpha"], eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"], momentum=optimizer_config["momentum"])
-    elif optimizer_config["use_optimizer"] == "sgd":
-        optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=optimizer_config["momentum"], weight_decay=optimizer_config["weight_decay"])
+    if use_optimizer == "adam":
+        return torch.optim.Adam(parameters, lr=learning_rate, betas=optimizer_config["betas"], eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"], amsgrad=optimizer_config["amsgrad"])
+    elif use_optimizer == "adadelta":
+        return torch.optim.Adadelta(parameters, lr=learning_rate, rho=optimizer_config["rho"], eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"])
+    elif use_optimizer == "adagrad":
+        return torch.optim.Adagrad(parameters, lr=learning_rate, lr_decay=optimizer_config["lr_decay"], weight_decay=optimizer_config["weight_decay"])
+    elif use_optimizer == "rmsprop":
+        return torch.optim.RMSprop(parameters, lr=learning_rate, alpha=optimizer_config["alpha"], eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"], momentum=optimizer_config["momentum"])
+    elif use_optimizer == "sgd":
+        return torch.optim.SGD(parameters, lr=learning_rate, momentum=optimizer_config["momentum"], weight_decay=optimizer_config["weight_decay"])
     else:
-        optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-    
-    print("You are currently using the optimizer: {}".format(optimizer))
+        return torch.optim.SGD(parameters, lr=learning_rate)
+
+def train(model, train_dataloader, test_dataloader, optimizer, device, epochs=5):
+    loss_fn = nn.BCEWithLogitsLoss()
     train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, device, epochs)
 
 
@@ -109,15 +123,20 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
 
 
 def run_classifier(trainer_config, model_config, optimizer_config):
-    wandb.init(project=trainer_config["project"], entity="histo-cancer-detection")
-    wandb.config = model_config
     train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=model_config["batch_size"], num_workers=model_config["num_workers"])
     model = get_model(img_shape, True)
+    optimizer=choose_optimizer(optimizer_config, model.parameters(), learning_rate=model_config["learning_rate"])
+    logging_config = log_metadata(model_config, optimizer)
+
+    wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=logging_config)
     log_model(model)
+    wandb.config = model_config
     wandb.watch(model)
+
+    print("You are currently using the optimizer: {}".format(optimizer))
     print(trainer_config["device"])
-    train(model, train_dataloader, test_dataloader, optimizer_config, trainer_config["device"],
-          learning_rate=model_config["learning_rate"], epochs=model_config["max_epochs"])
+
+    train(model, train_dataloader, test_dataloader, optimizer, trainer_config["device"], epochs=model_config["max_epochs"])
 
 
 # decreases logging for better performance! mostly relevant for small dsets
