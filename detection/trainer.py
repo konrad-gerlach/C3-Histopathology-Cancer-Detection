@@ -19,6 +19,7 @@ import os
 import pandas as pd
 from torch import nn
 import model
+import model2
 import data
 import wandb
 import config
@@ -27,18 +28,20 @@ import config
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
 
 def get_model(img_shape, normalize):
-    return model.Model1()
+    return model.Small_LeNet()
 
 def log_model(conv_model):
-    columns = ["Text"]
+    columns = ["Model"]
     data = []
 
     lines = conv_model.get_layers().split("\n")
     for line in lines:
         data.append([line])
+        print(line)
 
     table =  wandb.Table(data=data, columns=columns)
-    wandb.log({"The model we use": table}) 
+    wandb.log({"Metainfo": table}) 
+    
 
 
 
