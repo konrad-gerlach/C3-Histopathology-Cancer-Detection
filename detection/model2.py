@@ -2,7 +2,7 @@ from torch import nn
 
 class Big_Konrad(nn.Module):
     def __init__(self,img_shape,normalize=True):
-        super(Classifier, self).__init__()
+        super(Big_Konrad, self).__init__()
         self.normalize = normalize
         self.img_shape = img_shape
         self.layers = self.get_layers()
@@ -119,6 +119,27 @@ class VGG_16(nn.Module):
     
     def get_layers(self):
         return "VGG16"
+
+    def forward(self, x):
+        logits = self.layers(x)
+        return logits
+
+
+class No_Conv(nn.Module):
+    def __init__(self):
+        super(No_Conv, self).__init__()
+        self.layers = self.build_layers()
+
+    def build_layers(self):
+        return nn.Sequential(           
+            nn.Flatten(),
+            nn.Linear(27648, 9216),
+            nn.ReLU(),
+            nn.Linear(9216, 1)
+        )
+    
+    def get_layers(self):
+        return "No_Conv"
 
     def forward(self, x):
         logits = self.layers(x)
