@@ -18,14 +18,14 @@ TRAINER_CONFIG = dict(
 #if none is selected, sgd is used
 #https://pytorch.org/docs/stable/optim.html
 OPTIMIZER_CONFIG = dict(
-    use_optimizer = "sgd", 
+    #use_optimizer = "sgd", 
     alpha = 0.99, #For RmsProp
     betas= (0.9, 0.999), #For Adam
     rho=0.9, #For Adadelta
     eps=1e-08,
-    weight_decay=0.01,
+    weight_decay=0,
     amsgrad=False,
-    momentum=0.1,
+    momentum=0,
     lr_decay=0.1,
 )
 

@@ -29,7 +29,7 @@ import config
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
 
 def get_model(img_shape, normalize):
-    return model.Small_LeNet()
+    return model.Alex_Net()
     
 
 def log_metadata(model, model_config, optimizer):
@@ -41,8 +41,7 @@ def log_metadata(model, model_config, optimizer):
         train_portion=config.DATA_CONFIG["train_portion"],
         test_portion=config.DATA_CONFIG["test_portion"],
         optimizer= lines[0].split(" ")[0],
-        optimizer_parameters= lines[1:-1],
-        model_setup=list(model.modules())[2:]
+        optimizer_parameters= lines[1:-1]
     )
     return logging_config
 
