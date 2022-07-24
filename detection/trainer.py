@@ -20,7 +20,6 @@ import os
 import pandas as pd
 from torch import nn
 import model
-import model2
 import data
 import wandb
 import config
@@ -29,7 +28,7 @@ import config
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
 
 def get_model(img_shape, normalize):
-    return model.Alex_Net()
+    return model.Small_LeNet()
     
 
 def log_metadata(model, model_config, optimizer):
@@ -76,7 +75,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
         train_iter = enumerate(train_dataloader)
         train_epoch_loss = 0        
         model.train()
-        wandb.log("epoch",epoch)
+        wandb.log({"epoch": epoch})
         for batch, (X, y) in train_iter:
             # Compute prediction and loss
             X = X.to(device)
