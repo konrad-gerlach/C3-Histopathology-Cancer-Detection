@@ -31,6 +31,6 @@ OPTIMIZER_CONFIG = dict(
 )
 
 DATA_CONFIG = dict(
-    train_portion = 0.95,
+    train_portion = 0.9,
     test_portion = 0.1
 )
