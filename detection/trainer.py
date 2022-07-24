@@ -121,10 +121,11 @@ def run_classifier(trainer_config, model_config, optimizer_config):
     optimizer=choose_optimizer(optimizer_config, model.parameters(), learning_rate=model_config["learning_rate"])
     logging_config = log_metadata(model, model_config, optimizer)
 
-    wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=logging_config)
     wandb.config = model_config
+    
+    wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=logging_config)
     wandb.watch(model, criterion=None, log="gradients", log_freq=1000, idx=None,
-    log_graph=(False))
+    log_graph=(True))
 
 
     print("You are currently using the optimizer: {}".format(optimizer))
