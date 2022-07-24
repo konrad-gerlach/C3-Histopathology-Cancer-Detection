@@ -18,7 +18,7 @@ TRAINER_CONFIG = dict(
 #if none is selected, sgd is used
 #https://pytorch.org/docs/stable/optim.html
 OPTIMIZER_CONFIG = dict(
-    #use_optimizer = "sgd", 
+    use_optimizer = "", 
     alpha = 0.99, #For RmsProp
     betas= (0.9, 0.999), #For Adam
     rho=0.9, #For Adadelta
@@ -30,6 +30,6 @@ OPTIMIZER_CONFIG = dict(
 )
 
 DATA_CONFIG = dict(
-    train_portion = 0.9,
+    train_portion = 0.05,
     test_portion = 0.1
 )
