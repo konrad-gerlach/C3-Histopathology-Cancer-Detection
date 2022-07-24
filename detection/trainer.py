@@ -29,7 +29,7 @@ import config
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
 
 def get_model(img_shape, normalize):
-    return model.Small_LeNet()
+    return model.Alex_Net()
     
 
 def log_metadata(model, model_config, optimizer):
@@ -41,8 +41,7 @@ def log_metadata(model, model_config, optimizer):
         train_portion=config.DATA_CONFIG["train_portion"],
         test_portion=config.DATA_CONFIG["test_portion"],
         optimizer= lines[0].split(" ")[0],
-        optimizer_parameters= lines[1:-1],
-        model_setup=list(model.modules())[2:]
+        optimizer_parameters= lines[1:-1]
     )
     return logging_config
 
@@ -76,7 +75,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
         acc_accum = 0
         train_iter = enumerate(train_dataloader)
         train_epoch_loss = 0        
-
+        model.train()
         for batch, (X, y) in train_iter:
             # Compute prediction and loss
             X = X.to(device)
@@ -121,10 +120,11 @@ def run_classifier(trainer_config, model_config, optimizer_config):
     optimizer=choose_optimizer(optimizer_config, model.parameters(), learning_rate=model_config["learning_rate"])
     logging_config = log_metadata(model, model_config, optimizer)
 
-    wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=logging_config)
     wandb.config = model_config
+    
+    wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=logging_config)
     wandb.watch(model, criterion=None, log="gradients", log_freq=1000, idx=None,
-    log_graph=(False))
+    log_graph=(True))
 
 
     print("You are currently using the optimizer: {}".format(optimizer))

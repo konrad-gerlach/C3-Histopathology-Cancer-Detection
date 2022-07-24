@@ -69,23 +69,18 @@ class Alex_Net(Model):
 
     def get_layers(self):
         return nn.Sequential(
-            nn.Conv2d(3,96,kernel_size=7,stride=4,padding=0),
+            nn.Conv2d(3,6,kernel_size=7,stride=4,padding=0),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
-            nn.Conv2d(96,256,kernel_size=5,padding=2, stride=1),
+            nn.Conv2d(6,16,kernel_size=5,padding=2, stride=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
 
-            nn.Conv2d(256,384,kernel_size=3,padding=1),
-            nn.ReLU(),
-            nn.Conv2d(384,384,kernel_size=3,padding=1),
-            nn.ReLU(),
-            nn.Conv2d(384,256,kernel_size=3,padding=1),
+            nn.Conv2d(16,48,kernel_size=3,padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=3,stride=2,padding=0),
-
             nn.Flatten(),
-            nn.Linear(1024, 1024),
+            nn.Linear(192, 1024),
             nn.ReLU(),
             nn.Linear(1024, 1)
         )
