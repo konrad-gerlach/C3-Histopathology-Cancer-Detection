@@ -94,7 +94,7 @@ class Big_Konrad(Model):
 
     def get_layers(self):
         return nn.Sequential(
-            nn.Conv2d(self.img_shape[0],128,kernel_size=7,padding='same'),
+            nn.Conv2d(3,128,kernel_size=7,padding='same'),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(0.2, inplace=True),
             nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
@@ -115,8 +115,8 @@ class Big_Konrad(Model):
             nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
             
             nn.Flatten(),
-            nn.Linear(int(64*self.img_shape[1]/16*self.img_shape[2]/16), 200),
-            nn.BatchNorm2d(200),
+            nn.Linear(int(64*96/16*96/16), 200),
+            nn.BatchNorm1d(200),
             nn.LeakyReLU(0.2, inplace=True),
             nn.Linear(200, 400),
             nn.LeakyReLU(0.2, inplace=True),
