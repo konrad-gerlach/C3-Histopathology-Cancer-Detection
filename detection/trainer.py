@@ -76,6 +76,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
         train_iter = enumerate(train_dataloader)
         train_epoch_loss = 0        
         model.train()
+        wandb.log("epoch",epoch)
         for batch, (X, y) in train_iter:
             # Compute prediction and loss
             X = X.to(device)
