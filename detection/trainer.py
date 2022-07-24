@@ -29,22 +29,10 @@ import config
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
 
 def get_model(img_shape, normalize):
-    return model.VGG_16()
-
-def log_model(conv_model):
-    columns = ["Model"]
-    data = []
-
-    lines = conv_model.get_layers().split("\n")
-    for line in lines:
-        data.append([line])
-        print(line)
-
-    table =  wandb.Table(data=data, columns=columns)
-    wandb.log({"Metainfo": table}) 
+    return model.Small_LeNet()
     
 
-def log_metadata(model_config, optimizer):
+def log_metadata(model, model_config, optimizer):
     lines = str(optimizer).split("\n")
     logging_config = dict(
         batch_size= model_config["batch_size"],
@@ -54,6 +42,7 @@ def log_metadata(model_config, optimizer):
         test_portion=config.DATA_CONFIG["test_portion"],
         optimizer= lines[0].split(" ")[0],
         optimizer_parameters= lines[1:-1],
+        model_setup=list(model.modules())[2:]
     )
     return logging_config
 
@@ -130,17 +119,19 @@ def run_classifier(trainer_config, model_config, optimizer_config):
     train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=model_config["batch_size"], num_workers=model_config["num_workers"])
     model = get_model(img_shape, True)
     optimizer=choose_optimizer(optimizer_config, model.parameters(), learning_rate=model_config["learning_rate"])
-    logging_config = log_metadata(model_config, optimizer)
+    logging_config = log_metadata(model, model_config, optimizer)
 
     wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=logging_config)
-    #log_model(model)
     wandb.config = model_config
-    wandb.watch(model)
+    wandb.watch(model, criterion=None, log="gradients", log_freq=1000, idx=None,
+    log_graph=(False))
+
 
     print("You are currently using the optimizer: {}".format(optimizer))
     print(trainer_config["device"])
 
     train(model, train_dataloader, test_dataloader, optimizer, trainer_config["device"], epochs=model_config["max_epochs"])
+    wandb.finish()
 
 
 # decreases logging for better performance! mostly relevant for small dsets

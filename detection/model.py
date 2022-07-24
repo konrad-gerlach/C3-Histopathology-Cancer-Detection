@@ -42,26 +42,6 @@ class Small_LeNet(Model):
             nn.Linear(84, 1)
         )
 
-
-    def extract_layers(self):
-        output = "Model summary:\n"
-        X = torch.rand(size=(1, 3, 96, 96), dtype=torch.float32)
-        
-        output += "layer1:\n"        
-        for layer in self.layer1:
-            X = layer(X)
-            output += (layer.__class__.__name__ + 'output shape: \t' + str(X.shape) +'\n')
-
-        output += "layer2:\n"
-        for layer in self.layer2:
-            X = layer(X)
-            output += (layer.__class__.__name__ + 'output shape: \t' + str(X.shape) + '\n')
-
-        return output
-    
-    def print_layers(self):
-        print(model1.get_layers())
-
 class BigLeNet(Model):
     
     def get_layers(self):
@@ -202,5 +182,9 @@ class No_Conv(Model):
         )   
 
 if __name__ == "__main__":
-    model1 = Small_LeNet()
-    model1.print_layers()
+    model = Small_LeNet()
+    print(list(model.modules()))
+    
+    
+
+    
