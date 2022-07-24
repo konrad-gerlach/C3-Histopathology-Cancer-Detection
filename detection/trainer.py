@@ -29,7 +29,7 @@ import config
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
 
 def get_model(img_shape, normalize):
-    return model.Small_LeNet()
+    return model.VGG_16()
 
 def log_model(conv_model):
     columns = ["Model"]
@@ -70,6 +70,7 @@ def choose_optimizer(optimizer_config, parameters, learning_rate=1e-3):
         return torch.optim.RMSprop(parameters, lr=learning_rate, alpha=optimizer_config["alpha"], eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"], momentum=optimizer_config["momentum"])
     elif use_optimizer == "sgd":
         return torch.optim.SGD(parameters, lr=learning_rate, momentum=optimizer_config["momentum"], weight_decay=optimizer_config["weight_decay"])
+       
     else:
         return torch.optim.SGD(parameters, lr=learning_rate)
 
@@ -109,7 +110,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
 
 
             # loss and accuracy for some batches
-            if batch % 5 == 0:
+            if batch % 100 == 0:
                 loss  = loss.item()
                 current = batch * len(X)
                 train_acc = acc_accum / (current + len(X))
@@ -132,7 +133,7 @@ def run_classifier(trainer_config, model_config, optimizer_config):
     logging_config = log_metadata(model_config, optimizer)
 
     wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=logging_config)
-    log_model(model)
+    #log_model(model)
     wandb.config = model_config
     wandb.watch(model)
 
