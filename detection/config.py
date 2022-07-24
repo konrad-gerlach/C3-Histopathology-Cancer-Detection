@@ -3,7 +3,8 @@ import torch
 PRJ = "histo_cancer"
 
 MODEL_CONFIG = dict(
-    batch_size=64,
+    batch_size=16,
+    gradient_accumulation = 4, #https://stackoverflow.com/questions/63815311/what-is-the-correct-way-to-implement-gradient-accumulation-in-pytorch approach no 1. was chosen
     num_workers=4,
     learning_rate=0.01,
     max_epochs=100
@@ -30,6 +31,6 @@ OPTIMIZER_CONFIG = dict(
 )
 
 DATA_CONFIG = dict(
-    train_portion = 0.05,
+    train_portion = 0.95,
     test_portion = 0.1
 )

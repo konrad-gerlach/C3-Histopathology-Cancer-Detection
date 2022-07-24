@@ -44,9 +44,9 @@ def log_metadata(model, model_config, optimizer):
     )
     return logging_config
 
-def choose_optimizer(optimizer_config, parameters, learning_rate=1e-3):
+def choose_optimizer(optimizer_config, parameters, gradient_accumulation, learning_rate=1e-3, ):
     use_optimizer= optimizer_config["use_optimizer"].lower()
-
+    learning_rate = learning_rate / gradient_accumulation
     if use_optimizer == "adam":
         return torch.optim.Adam(parameters, lr=learning_rate, betas=optimizer_config["betas"], eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"], amsgrad=optimizer_config["amsgrad"])
     elif use_optimizer == "adadelta":
@@ -61,12 +61,12 @@ def choose_optimizer(optimizer_config, parameters, learning_rate=1e-3):
     else:
         return torch.optim.SGD(parameters, lr=learning_rate)
 
-def train(model, train_dataloader, test_dataloader, optimizer, device, epochs=5):
+def train(model, train_dataloader, test_dataloader, optimizer, device, gradient_accumulation,epochs=5):
     loss_fn = nn.BCEWithLogitsLoss()
-    train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, device, epochs)
+    train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, device, epochs,gradient_accumulation)
 
 
-def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, device, epochs):
+def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, device, epochs,gradient_accumulation=1):
     model = model.to(device)
     size = len(train_dataloader.dataset)
 
@@ -86,10 +86,12 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
             loss = loss_fn(pred, y)
             train_epoch_loss += loss
 
-            # Backpropagation
-            optimizer.zero_grad()
+            # Backpropagation with gradient accumulation
             loss.backward()
-            optimizer.step()
+            if batch % gradient_accumulation == 0:
+                optimizer.step()
+                optimizer.zero_grad()
+            
 
             pred = predicted_lables(pred) 
             acc_accum += (pred == y).sum()       
@@ -117,7 +119,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
 def run_classifier(trainer_config, model_config, optimizer_config):
     train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=model_config["batch_size"], num_workers=model_config["num_workers"])
     model = get_model(img_shape, True)
-    optimizer=choose_optimizer(optimizer_config, model.parameters(), learning_rate=model_config["learning_rate"])
+    optimizer=choose_optimizer(optimizer_config, model.parameters(), model_config["gradient_accumulation"], learning_rate=model_config["learning_rate"])
     logging_config = log_metadata(model, model_config, optimizer)
 
     wandb.config = model_config
@@ -130,7 +132,7 @@ def run_classifier(trainer_config, model_config, optimizer_config):
     print("You are currently using the optimizer: {}".format(optimizer))
     print(trainer_config["device"])
 
-    train(model, train_dataloader, test_dataloader, optimizer, trainer_config["device"], epochs=model_config["max_epochs"])
+    train(model, train_dataloader, test_dataloader, optimizer, trainer_config["device"], model_config["gradient_accumulation"], epochs=model_config["max_epochs"])
     wandb.finish()
 
 
