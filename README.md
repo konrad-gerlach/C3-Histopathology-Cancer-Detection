@@ -9,3 +9,16 @@ source pytorch-venv/bin/activate
 ```
 clone this repo into directory and
 execute `pip3 install -r requirements.txt`
+
+# Training on Google Colab
+1. Neuen ordner erstellen (wie detection in unserem Github)
+2. In den Ordner alle .py Dateien aus detection hochladen
+3. Bei dem root ordner einen Unterordner .kaggle erstellen und dort kaggle.json hochladen
+```bash
+!pip3 install wandb
+!python3 detection/data.py
+!python3 detection/trainer.py
+```
+4. Dann wird man gefragt, wie man sich bei wandb einloggen will, mit Option 2 und seinen key einfügen
+
+Mit einem Doppelklick auf die Dateien kann man sie direkt dort bearbeiten.
