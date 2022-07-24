@@ -93,8 +93,9 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
                 optimizer.zero_grad()
             
 
-            pred = predicted_lables(pred) 
-            acc_accum += (pred == y).sum()       
+            pred = predicted_lables(pred)
+            batch_acc_accum = (pred == y).sum()
+            acc_accum += batch_acc_accum       
 
             print(str(batch), end='\r')
 
@@ -103,10 +104,12 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
             if batch % 100 == 0:
                 loss  = loss.item()
                 current = batch * len(X)
+                batch_acc = batch_acc_accum / len(X)
                 train_acc = acc_accum / (current + len(X))
                 print(f"train loss: {loss:>7f} train accuracy: {train_acc:>7f} [{current:>5d}/{size:>5d}]")
                 wandb.log({"loss": loss})
-                wandb.log({"train accuracy per batch": train_acc})
+                wandb.log({"train accuracy per batch":batch_acc})
+                wandb.log({"train accuracy rolling avg per epoch": train_acc})
         
         # loss while training
         train_epoch_loss /= batch + 1
