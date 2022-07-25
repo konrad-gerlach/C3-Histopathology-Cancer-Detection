@@ -79,12 +79,13 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
         wandb.log({"epoch": epoch})
         for batch, (X, y) in train_iter:
             # Compute prediction and loss
-            X = X.to(device)
-            y = y.to(device)
+            X = X.to(device, non_blocking=True)
+            y = y.to(device, non_blocking=True)
             y = y.view(-1, 1).to(torch.float)
 
             pred = model(X)
             loss = loss_fn(pred, y)
+            # fix oom https://pytorch.org/docs/stable/notes/faq.html
             train_epoch_loss += float(loss)
 
             # Backpropagation with gradient accumulation
@@ -95,7 +96,8 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
             
 
             pred = predicted_lables(pred) 
-            acc_accum += float((pred == y).sum()) 
+            acc_accum += float((pred == y).sum())
+            # sth missing here?
 
             print(str(batch), end='\r')
 
@@ -104,10 +106,12 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
             if batch % 100 == 0:
                 loss  = loss.item()
                 current = batch * len(X)
+                batch_acc = batch_acc_accum / len(X)
                 train_acc = acc_accum / (current + len(X))
                 print(f"train loss: {loss:>7f} train accuracy: {train_acc:>7f} [{current:>5d}/{size:>5d}]")
                 wandb.log({"loss": loss})
-                wandb.log({"train accuracy per batch": train_acc})
+                wandb.log({"train accuracy per batch":batch_acc})
+                wandb.log({"train accuracy rolling avg per epoch": train_acc})
         
         # loss while training
         train_epoch_loss /= batch + 1
