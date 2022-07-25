@@ -23,12 +23,13 @@ import model
 import data
 import wandb
 import config
+import test
 
 
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
 
 def get_model(img_shape, normalize):
-    return model.Big_Konrad()
+    return model.Small_LeNet()
     
 
 def log_metadata(model, model_config, optimizer):
@@ -84,7 +85,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
 
             pred = model(X)
             loss = loss_fn(pred, y)
-            train_epoch_loss += loss
+            train_epoch_loss += float(loss)
 
             # Backpropagation with gradient accumulation
             loss.backward()
@@ -94,7 +95,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
             
 
             pred = predicted_lables(pred) 
-            acc_accum += (pred == y).sum()       
+            acc_accum += float((pred == y).sum()) 
 
             print(str(batch), end='\r')
 
@@ -113,7 +114,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
         wandb.log({"train loss per epoch": train_epoch_loss})
         print('epoch {}, train loss {}'.format(epoch+1,  train_epoch_loss))
 
-        test_loop(model, test_dataloader, loss_fn, device, epoch)
+        test.test_loop(model, test_dataloader, loss_fn, device, epoch)
 
 
 def run_classifier(trainer_config, model_config, optimizer_config):

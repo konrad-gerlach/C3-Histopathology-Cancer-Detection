@@ -20,11 +20,11 @@ def test_loop(model, test_dataloader, loss_fn, device, epoch):
             pred_test = model(X_test)
 
             batch_loss = loss_fn(model(X_test), y_test) 
-            test_loss_epoch += batch_loss
+            test_loss_epoch += float(batch_loss)
 
             pred_lables_test = predicted_lables(pred_test)
             n += len(y_test)
-            correct_pred += (pred_lables_test == y_test).sum()
+            correct_pred += float((pred_lables_test == y_test).sum())
 
         test_loss_epoch /= len(test_dataloader)
         epoch_acc = correct_pred / n
