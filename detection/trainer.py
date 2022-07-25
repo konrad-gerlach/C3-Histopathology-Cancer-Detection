@@ -28,7 +28,7 @@ import config
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
 
 def get_model(img_shape, normalize):
-    return model.Big_Konrad()
+    return model.Very_Big_Konrad()
     
 
 def log_metadata(model, model_config, optimizer):

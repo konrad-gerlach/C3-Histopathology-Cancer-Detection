@@ -126,6 +126,50 @@ class Big_Konrad(Model):
             nn.Linear(400, 1)
         )
 
+class Very_Big_Konrad(Model):
+
+    def get_layers(self):
+        return nn.Sequential(
+            nn.Conv2d(3,128,kernel_size=7,padding='same'),
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
+
+            nn.Conv2d(128,256,kernel_size=5,padding='same'),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
+
+            nn.Conv2d(256,512,kernel_size=3,padding='same'),
+            nn.BatchNorm2d(512),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            nn.Conv2d(512,512,kernel_size=3,padding='same'),
+            nn.BatchNorm2d(512),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            nn.Conv2d(512,512,kernel_size=3,padding='same'),
+            nn.BatchNorm2d(512),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
+
+            nn.Conv2d(512,64,kernel_size=1,padding='same'),
+            nn.BatchNorm2d(64),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
+            
+            nn.Flatten(),
+            nn.Dropout(p=0.5),
+            nn.Linear(int(64*96/16*96/16), 1000),
+            nn.BatchNorm1d(1000),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Dropout(p=0.5),
+            nn.Linear(400, 400),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Dropout(p=0.5),
+            nn.Linear(400, 1)
+        )
+
 class VGG_16(Model):
 
     def get_layers(self):
