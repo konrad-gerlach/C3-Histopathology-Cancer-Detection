@@ -115,11 +115,14 @@ class Big_Konrad(Model):
             nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
             
             nn.Flatten(),
+            nn.Dropout(p=0.5),
             nn.Linear(int(64*96/16*96/16), 200),
             nn.BatchNorm1d(200),
             nn.LeakyReLU(0.2, inplace=True),
+            nn.Dropout(p=0.5),
             nn.Linear(200, 400),
             nn.LeakyReLU(0.2, inplace=True),
+            nn.Dropout(p=0.5),
             nn.Linear(400, 1)
         )
 
