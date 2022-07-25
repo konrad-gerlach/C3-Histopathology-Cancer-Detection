@@ -95,8 +95,10 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
                 optimizer.zero_grad()
             
 
-            pred = predicted_lables(pred) 
-            acc_accum += float((pred == y).sum())
+            pred = predicted_lables(pred)
+            batch_acc_accum = float((pred == y).sum())
+            acc_accum += float(batch_acc_accum)
+            
 
             print(str(batch), end='\r')
 
