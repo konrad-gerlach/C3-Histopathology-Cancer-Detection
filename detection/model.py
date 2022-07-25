@@ -164,7 +164,7 @@ class Very_Big_Konrad(Model):
             nn.BatchNorm1d(1000),
             nn.LeakyReLU(0.2, inplace=True),
             nn.Dropout(p=0.5),
-            nn.Linear(400, 400),
+            nn.Linear(1000, 400),
             nn.LeakyReLU(0.2, inplace=True),
             nn.Dropout(p=0.5),
             nn.Linear(400, 1)
