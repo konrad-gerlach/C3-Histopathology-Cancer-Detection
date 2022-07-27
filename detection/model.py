@@ -64,7 +64,7 @@ class BigLeNet(Model):
             nn.Linear(4445, 1)
         )    
 
-class Tillus(Model):
+class Big_Uff(Model):
     
     def get_layers(self):
         return nn.Sequential(

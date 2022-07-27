@@ -126,7 +126,7 @@ if __name__ == "__main__":
 
     for batch, (X, y) in a:
         show(X,y)
-        if batch == 1:
+        if batch == 0:
             break
     plt.show()
     
