@@ -68,26 +68,34 @@ class Tillus(Model):
     
     def get_layers(self):
         return nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=11, stride=1, padding=0),
+            nn.Dropout2d(p=0.1),
+            nn.Conv2d(3, 32, kernel_size=11, stride=1, padding=0, bias=False),
             nn.BatchNorm2d(32),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
 
-            nn.Conv2d(32, 64, kernel_size=5, stride=1, padding=0),
+            nn.Dropout2d(p=0.1),
+            nn.Conv2d(32, 64, kernel_size=5, stride=1, padding=0, bias=False),
             nn.BatchNorm2d(64),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
 
-            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=0),
+            nn.Dropout2d(p=0.1),
+            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=0, bias=False),
             nn.BatchNorm2d(128),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
 
             nn.Flatten(),
-            nn.Linear(8192, 1000),
+            nn.Dropout(p=0.5),
+            nn.Linear(8192, 1000, bias=False),
+            nn.BatchNorm1d(1000),
             nn.ReLU(),
-            nn.Linear(1000, 1000),
+            nn.Dropout(p=0.5),
+            nn.Linear(1000, 1000, bias=False),
+            nn.BatchNorm1d(1000),
             nn.ReLU(),
+            nn.Dropout(p=0.5),
             nn.Linear(1000, 1)
         ) 
 
@@ -148,6 +156,7 @@ class Big_Konrad(Model):
             nn.LeakyReLU(0.2, inplace=True),
             nn.Dropout(p=0.5),
             nn.Linear(200, 400),
+            #no batchnorm?
             nn.LeakyReLU(0.2, inplace=True),
             nn.Dropout(p=0.5),
             nn.Linear(400, 1)
