@@ -164,7 +164,7 @@ def introduce_sweep():
 
     sweep_id = wandb.sweep(sweep_config, project="histo_cancer")
 
-    wandb.agent(sweep_id, run_classifier, count=5)
+    wandb.agent(sweep_id, run_classifier, count=1000)
 
 def run_classifier(sweep_config=None):
 
