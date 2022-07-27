@@ -1,4 +1,5 @@
 from __future__ import print_function, division
+from calendar import c
 import logging
 from data import get_dl, get_ds
 from test import test_loop
@@ -27,9 +28,8 @@ import test
 
 
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
-
-def get_model(img_shape, normalize):
-    return model.Small_LeNet()
+def get_model(img_shape, normalize, fc_layer_size, conv_dropout, fully_dropout):
+    return model.Tillus(fc_layer_size, conv_dropout, fully_dropout)
     
 
 def log_metadata(model, model_config, optimizer):
@@ -44,6 +44,7 @@ def log_metadata(model, model_config, optimizer):
         optimizer_parameters= lines[1:-1]
     )
     return logging_config
+
 
 def choose_optimizer(optimizer_config, parameters, gradient_accumulation, learning_rate=1e-3, ):
     use_optimizer= optimizer_config["use_optimizer"].lower()
@@ -121,25 +122,79 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
 
         test.test_loop(model, test_dataloader, loss_fn, device, epoch)
 
+def introduce_sweep():
+    sweep_config = {'method': 'random'}
 
-def run_classifier(trainer_config, model_config, optimizer_config):
-    train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=model_config["batch_size"], num_workers=model_config["num_workers"])
-    model = get_model(img_shape, True)
-    optimizer=choose_optimizer(optimizer_config, model.parameters(), model_config["gradient_accumulation"], learning_rate=model_config["learning_rate"])
-    logging_config = log_metadata(model, model_config, optimizer)
+    metric = {
+    'name': 'test accuracy per epoch',
+    'goal': 'maximize'   
+    }
+    sweep_config['metric'] = metric
 
-    wandb.config = model_config
+    parameters_dict = {
+    'optimizer': {
+        'values': ['adam', 'sgd', 'rmspropp']
+        },
+    'fc_layer_size': {
+        'values': [128, 256, 512]
+        },
+    'fully_dropout': {
+          'values': [0.4, 0.5, 0.6]
+        },
+    'conv_dropout': {
+        'values': [0.1, 0.2, 0.3]
+    },
+    'batch_size': {
+          'values': [4, 16, 64]
+        },
+    'learning_rate': {
+        # a flat distribution between 0 and 0.1
+        'distribution': 'uniform',
+        'min': 0,
+        'max': 0.1
+      },
+    'weight_decay': {
+        # a flat distribution between 0 and 0.1
+        'distribution': 'uniform',
+        'min': 0,
+        'max': 0.1
+      },
+    }
+    sweep_config['parameters'] = parameters_dict
+
+    sweep_id = wandb.sweep(sweep_config, project="histo_cancer")
+
+    wandb.agent(sweep_id, run_classifier, count=5)
+
+def run_classifier(sweep_config=None):
+
+    trainer_config = config.TRAINER_CONFIG
     
-    wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=logging_config)
-    wandb.watch(model, criterion=None, log="gradients", log_freq=1000, idx=None,
-    log_graph=(True))
+    with wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=sweep_config):
+        sweep_config=wandb.config        
+        model_config = config.MODEL_CONFIG
+        model_config["lr"]=sweep_config.learning_rate
+        model_config["batch_size"]=sweep_config.batch_size
+        optimizer_config = config.OPTIMIZER_CONFIG
+        optimizer_config["use_optimizer"]=sweep_config.optimizer
+        optimizer_config["weight_decay"]=sweep_config.weight_decay
+        train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=model_config["batch_size"], num_workers=model_config["num_workers"])
+        model = get_model(img_shape, True, fc_layer_size=sweep_config.fc_layer_size, conv_dropout=sweep_config.conv_dropout, fully_dropout=sweep_config.fully_dropout)
+        optimizer=choose_optimizer(optimizer_config, model.parameters(), model_config["gradient_accumulation"], learning_rate=model_config["lr"])
+        #logging_config = log_metadata(model, model_config, optimizer)
+
+        #wandb.config = model_config
+        
+        
+        #wandb.watch(model, criterion=None, log="gradients", log_freq=1000, idx=None, log_graph=(True))
+    
 
 
-    print("You are currently using the optimizer: {}".format(optimizer))
-    print(trainer_config["device"])
+        print("You are currently using the optimizer: {}".format(optimizer))
+        print(trainer_config["device"])
 
-    train(model, train_dataloader, test_dataloader, optimizer, trainer_config["device"], model_config["gradient_accumulation"], epochs=model_config["max_epochs"])
-    wandb.finish()
+        train(model, train_dataloader, test_dataloader, optimizer, trainer_config["device"], model_config["gradient_accumulation"], epochs=model_config["max_epochs"])
+        #wandb.finish()
 
 
 # decreases logging for better performance! mostly relevant for small dsets
@@ -149,4 +204,5 @@ GPUS = 1
 
 
 if __name__ == "__main__":
-    run_classifier(config.TRAINER_CONFIG, config.MODEL_CONFIG, config.OPTIMIZER_CONFIG)
+    introduce_sweep()
+    #run_classifier(config.TRAINER_CONFIG, config.MODEL_CONFIG, config.OPTIMIZER_CONFIG)
