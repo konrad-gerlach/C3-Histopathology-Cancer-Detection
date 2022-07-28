@@ -205,4 +205,4 @@ GPUS = 1
 
 if __name__ == "__main__":
     introduce_sweep()
-    #run_classifier(config.TRAINER_CONFIG, config.MODEL_CONFIG, config.OPTIMIZER_CONFIG)
+    run_classifier(config.TRAINER_CONFIG, config.MODEL_CONFIG, config.OPTIMIZER_CONFIG)
