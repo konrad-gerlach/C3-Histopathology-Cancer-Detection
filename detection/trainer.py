@@ -29,7 +29,7 @@ import test
 
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
 def get_model(img_shape, normalize, fc_layer_size, conv_dropout, fully_dropout):
-    return model.Tillus(fc_layer_size, conv_dropout, fully_dropout)
+    return model.Big_Konrad(fc_layer_size, conv_dropout, fully_dropout)
     
 
 def log_metadata(model, model_config, optimizer):

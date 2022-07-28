@@ -107,18 +107,18 @@ class Alex_Net(Model):
 
     def get_layers(self):
         return nn.Sequential(
-            nn.Conv2d(3,96,kernel_size=7,stride=4,padding=0),
+            nn.Conv2d(3,96,kernel_size=7,stride=4,padding=0, bias=False),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
-            nn.Conv2d(96,256,kernel_size=5,padding=2, stride=1),
+            nn.Conv2d(96,256,kernel_size=5,padding=2, stride=1, bias=False),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
 
-            nn.Conv2d(256,384,kernel_size=3,padding=1),
+            nn.Conv2d(256,384,kernel_size=3,padding=1, bias=False),
             nn.ReLU(),
-            nn.Conv2d(384,384,kernel_size=3,padding=1),
+            nn.Conv2d(384,384,kernel_size=3,padding=1, bias=False),
             nn.ReLU(),
-            nn.Conv2d(384,256,kernel_size=3,padding=1),
+            nn.Conv2d(384,256,kernel_size=3,padding=1, bias=False),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=3,stride=2,padding=0),
 
@@ -131,30 +131,31 @@ class Alex_Net(Model):
 class Big_Konrad(Model):
     def __init__(self,s , c, f):
         super(Model, self).__init__()
+        print("->", self.__class__.__name__)
         self.layers = self.get_layers(s=s, c=c, f=f)
 
     def get_layers(self, s, c, f):
         return nn.Sequential(
             nn.Dropout2d(p=c),
-            nn.Conv2d(3,128,kernel_size=7,padding='same'),
+            nn.Conv2d(3,128,kernel_size=7,padding='same', bias=False),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(0.2, inplace=True),
             nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
 
             nn.Dropout2d(p=c),
-            nn.Conv2d(128,256,kernel_size=5,padding='same'),
+            nn.Conv2d(128,256,kernel_size=5,padding='same', bias=False),
             nn.BatchNorm2d(256),
             nn.LeakyReLU(0.2, inplace=True),
             nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
 
             nn.Dropout2d(p=c),
-            nn.Conv2d(256,512,kernel_size=3,padding='same'),
+            nn.Conv2d(256,512,kernel_size=3,padding='same', bias=False),
             nn.BatchNorm2d(512),
             nn.LeakyReLU(0.2, inplace=True),
             nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
 
             nn.Dropout2d(p=c),
-            nn.Conv2d(512,64,kernel_size=1,padding='same'),
+            nn.Conv2d(512,64,kernel_size=1,padding='same', bias=False),
             nn.BatchNorm2d(64),
             nn.LeakyReLU(0.2, inplace=True),
             nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
