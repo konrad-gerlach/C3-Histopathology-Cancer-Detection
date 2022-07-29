@@ -122,9 +122,8 @@ def show(images, labels):
 
 if __name__ == "__main__":
     train_dataloader, test_dataloader, img_shape = get_dl(batch_size=4, num_workers=4)
-    a = enumerate(train_dataloader)
 
-    for batch, (X, y) in a:
+    for batch, (X, y) in enumerate(train_dataloader):
         show(X,y)
         if batch == 0:
             break

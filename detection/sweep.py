@@ -1,4 +1,7 @@
+from cgi import test
 import wandb
+import trainer
+import config
 
 def run_sweep():
     sweep_config = {'method': 'random'}
@@ -25,7 +28,7 @@ def run_sweep():
     'batch_size': {
           'values': [4, 16, 64]
         },
-    'learning_rate': {
+    'lr': {
         # a flat distribution between 0 and 0.1
         'distribution': 'uniform',
         'min': 0,
@@ -40,11 +43,35 @@ def run_sweep():
     }
     sweep_config['parameters'] = parameters_dict
 
-    sweep_id = wandb.sweep(sweep_config, project="histo_cancer")
+    sweep_id = wandb.sweep(sweep_config, project=config.PRJ)
 
-    wandb.agent(sweep_id, run_classifier, count=1000)
-    
-    return 0
+    wandb.agent(sweep_id, run_classifier_with_config, count=config.SWEEP_CONFIG["runs"])
+
+def run_classifier_with_config(sweep_config):
+    #change the configs globally so they can be unsed elsewhere
+    config.MODEL_CONFIG["epochs"]=config.SWEEP_CONFIG["epochs"]
+    config.MODEL_CONFIG["lr"]=sweep_config.lr
+    config.MODEL_CONFIG["batch_size"]=sweep_config.batch_size
+
+    config.OPTIMIZER_CONFIG["use_optimizer"]=sweep_config.optimizer
+    config.OPTIMIZER_CONFIG["weight_decay"]=sweep_config.weight_decay
+
+    config.DATA_CONFIG["train_portion"] = config.SWEEP_CONFIG["train_portion"]
+    config.DATA_CONFIG["test_portion"] = config.SWEEP_CONFIG["test_portion"]
+
+    config.SP_MODEL_CONFIG["fc_layer_size"] = sweep_config.fc_layer_size
+    config.SP_MODEL_CONFIG["conv_dropout"] = sweep_config.conv_dropout
+    config.SP_MODEL_CONFIG["fully_dropout"] = sweep_config.fully_dropout
+
+    trainer.run_classifier()
+
+def runn_sweep():
+    a = "sdjk"
+    lol
+
+def lol(a=None):
+    print(a)
+
 
 if __name__ == "__main__":
-    run_sweep()
+    runn_sweep()
