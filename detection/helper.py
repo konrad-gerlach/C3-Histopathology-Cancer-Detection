@@ -23,11 +23,11 @@ def choose_optimizer(optimizer_config, parameters, gradient_accumulation, learni
     else:
         return torch.optim.SGD(parameters, lr=learning_rate)
 
-def log_metadata(model, model_config, optimizer):
+def log_metadata(model_config, optimizer):
     lines = str(optimizer).split("\n")
     logging_config = dict(
         batch_size= model_config["batch_size"],
-        learning_rate= model_config["learning_rate"],
+        learning_rate= model_config["lr"],
         max_epochs= model_config["max_epochs"],
         train_portion=config.DATA_CONFIG["train_portion"],
         test_portion=config.DATA_CONFIG["test_portion"],

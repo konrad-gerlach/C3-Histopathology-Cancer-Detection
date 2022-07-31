@@ -1,5 +1,6 @@
 from __future__ import print_function, division
 from calendar import c
+from cmath import log
 from distutils.file_util import copy_file
 import logging
 from data import get_dl, get_ds
@@ -29,7 +30,7 @@ import helper
 
 
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
-def get_model(img_shape, normalize, fc_layer_size, conv_dropout, fully_dropout):
+def get_model(img_shape, normalize):
     #first parameters?
     #insert values from SP_MODEL_CONFIG here if necessary
     return model.Big_Konrad(config.SP_MODEL_CONFIG["fc_layer_size"], config.SP_MODEL_CONFIG["conv_dropout"], config.SP_MODEL_CONFIG["fully_dropout"])
@@ -93,22 +94,25 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
 
         test.test_loop(model, test_dataloader, loss_fn, device, epoch)
 
+def classifier():
+    trainer_config = config.TRAINER_CONFIG
+    wandb.init(project=trainer_config["project"], entity=trainer_config["entity"])
+    run_classifier
+
 def run_classifier():
     trainer_config = config.TRAINER_CONFIG
     model_config = config.MODEL_CONFIG
     optimizer_config = config.OPTIMIZER_CONFIG
-    data_config = config.DATA_CONFIG
 
-    train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=model_config["batch_size"], num_workers=model_config["num_workers"], train_portion=data_config["train_portion"], test_portion=data_config["test_portion"])
+    train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=model_config["batch_size"], num_workers=model_config["num_workers"])
     model = get_model(img_shape, True)
     optimizer = helper.choose_optimizer(optimizer_config, model.parameters(), model_config["gradient_accumulation"], learning_rate=model_config["lr"])
-    logging_config = helper.log_metadata(model, model_config, optimizer)
-
-    wandb.config = model_config
-    
-    wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=logging_config)
-    wandb.watch(model, criterion=None, log="gradients", log_freq=1000, idx=None,
-    log_graph=(True))
+    logging_config = helper.log_metadata(model_config, optimizer)
+ 
+    #wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=logging_config)
+    wandb.config = logging_config
+   
+    wandb.watch(model, criterion=None, log="gradients", log_freq=1000, idx=None, log_graph=(True))
 
 
     print("You are currently using the optimizer: {}".format(optimizer))
@@ -155,4 +159,5 @@ GPUS = 1
 
 
 if __name__ == "__main__":
-    run_classifier()
+    classifier()
+    

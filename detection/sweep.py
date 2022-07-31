@@ -45,33 +45,28 @@ def run_sweep():
 
     sweep_id = wandb.sweep(sweep_config, project=config.PRJ)
 
-    wandb.agent(sweep_id, run_classifier_with_config, count=config.SWEEP_CONFIG["runs"])
+    wandb.agent(sweep_id, run_classifier_with, count=config.SWEEP_CONFIG["runs"])
 
-def run_classifier_with_config(sweep_config):
-    #change the configs globally so they can be unsed elsewhere
-    config.MODEL_CONFIG["epochs"]=config.SWEEP_CONFIG["epochs"]
-    config.MODEL_CONFIG["lr"]=sweep_config.lr
-    config.MODEL_CONFIG["batch_size"]=sweep_config.batch_size
+def run_classifier_with(sweep_config=None):
+    
+    with wandb.init(project=config.TRAINER_CONFIG["project"], entity=config.TRAINER_CONFIG["entity"], config=sweep_config):
+        sweep_config = wandb.config
+        #change the configs globally so they can be unsed elsewhere
+        config.MODEL_CONFIG["max_epochs"]=config.SWEEP_CONFIG["epochs"]
+        config.MODEL_CONFIG["lr"]=sweep_config.lr
+        config.MODEL_CONFIG["batch_size"]=sweep_config.batch_size
 
-    config.OPTIMIZER_CONFIG["use_optimizer"]=sweep_config.optimizer
-    config.OPTIMIZER_CONFIG["weight_decay"]=sweep_config.weight_decay
+        config.OPTIMIZER_CONFIG["use_optimizer"]=sweep_config.optimizer
+        config.OPTIMIZER_CONFIG["weight_decay"]=sweep_config.weight_decay
 
-    config.DATA_CONFIG["train_portion"] = config.SWEEP_CONFIG["train_portion"]
-    config.DATA_CONFIG["test_portion"] = config.SWEEP_CONFIG["test_portion"]
+        config.DATA_CONFIG["train_portion"] = config.SWEEP_CONFIG["train_portion"]
+        config.DATA_CONFIG["test_portion"] = config.SWEEP_CONFIG["test_portion"]
 
-    config.SP_MODEL_CONFIG["fc_layer_size"] = sweep_config.fc_layer_size
-    config.SP_MODEL_CONFIG["conv_dropout"] = sweep_config.conv_dropout
-    config.SP_MODEL_CONFIG["fully_dropout"] = sweep_config.fully_dropout
+        config.SP_MODEL_CONFIG["fc_layer_size"] = sweep_config.fc_layer_size
+        config.SP_MODEL_CONFIG["conv_dropout"] = sweep_config.conv_dropout
+        config.SP_MODEL_CONFIG["fully_dropout"] = sweep_config.fully_dropout
 
-    trainer.run_classifier()
-
-def runn_sweep():
-    a = "sdjk"
-    lol
-
-def lol(a=None):
-    print(a)
-
+        trainer.run_classifier()
 
 if __name__ == "__main__":
-    runn_sweep()
+    run_sweep()

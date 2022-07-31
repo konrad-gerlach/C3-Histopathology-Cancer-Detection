@@ -21,6 +21,7 @@ SP_MODEL_CONFIG = dict(
 
 TRAINER_CONFIG = dict(
     project=PRJ,
+    entity="histo-cancer-detection",
     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
 )
 
@@ -48,8 +49,9 @@ DATA_CONFIG = dict(
 
 #default values
 SWEEP_CONFIG = dict(
-    train_portion = 0.1,
-    test_portion = 0.1,
-    epochs = 10,
+    train_portion = 0.001,
+    test_portion = 0.001,
+    epochs = 1
+    ,
     runs = 1000
 )
