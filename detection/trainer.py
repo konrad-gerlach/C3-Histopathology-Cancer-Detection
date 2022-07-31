@@ -29,10 +29,10 @@ import helper
 
 
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
-def get_model(img_shape, normalize, fc_layer_size, conv_dropout, fully_dropout):
+def get_model(img_shape, normalize, fc_layer_size=config.SP_MODEL_CONFIG["fc_layer_size"], conv_dropout=config.SP_MODEL_CONFIG["conv_dropout"], fully_dropout=config.SP_MODEL_CONFIG["fully_dropout"]):
     #first parameters?
     #insert values from SP_MODEL_CONFIG here if necessary
-    return model.Big_Konrad(config.SP_MODEL_CONFIG["fc_layer_size"], config.SP_MODEL_CONFIG["conv_dropout"], config.SP_MODEL_CONFIG["fully_dropout"])
+    return model.Big_Konrad(fc_layer_size,conv_dropout,fully_dropout)
 
 def train(model, train_dataloader, test_dataloader, optimizer, device, gradient_accumulation,epochs=5):
     loss_fn = nn.BCEWithLogitsLoss()
