@@ -20,10 +20,10 @@ class Model(nn.Module):
         return logits 
 
 class Big_Konrad(Model):
-    def __init__(self,s , c, f):
+    def __init__(self,fc_layer_size , conv_dropout, fully_dropout):
         super(Model, self).__init__()
         print("->", self.__class__.__name__)
-        self.layers = self.get_layers(s=s, c=c, f=f)
+        self.layers = self.get_layers(s=fc_layer_size, c=conv_dropout, f=fully_dropout)
 
     def get_layers(self, s, c, f):
         return nn.Sequential(

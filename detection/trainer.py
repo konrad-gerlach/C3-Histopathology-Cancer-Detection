@@ -2,6 +2,7 @@ from __future__ import print_function, division
 import argparse
 from calendar import c
 from cmath import log
+from curses.ascii import SP
 from distutils.file_util import copy_file
 import logging
 from data import get_dl, get_ds
@@ -21,6 +22,9 @@ import torch
 import os
 import pandas as pd
 from torch import nn
+from config import MODEL_CONFIG
+from detection.config import SP_MODEL_CONFIG
+from helper import log_metadata
 import model
 import data
 import wandb
@@ -33,7 +37,7 @@ import helper
 def get_model(img_shape, normalize, fc_layer_size=config.SP_MODEL_CONFIG["fc_layer_size"], conv_dropout=config.SP_MODEL_CONFIG["conv_dropout"], fully_dropout=config.SP_MODEL_CONFIG["fully_dropout"]):
     #first parameters?
     #insert values from SP_MODEL_CONFIG here if necessary
-    return model.Big_Konrad(fc_layer_size,conv_dropout,fully_dropout)
+    return MODEL_CONFIG["model_class"](**SP_MODEL_CONFIG)
 
 def train(model, train_dataloader, test_dataloader, optimizer, device, gradient_accumulation,epochs=5):
     loss_fn = nn.BCEWithLogitsLoss()
@@ -96,10 +100,11 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
 
 def classifier():
     trainer_config = config.TRAINER_CONFIG
-    wandb.init(project=trainer_config["project"], entity=trainer_config["entity"])
-    run_classifier
+    run = wandb.init(project=trainer_config["project"], entity=trainer_config["entity"], job_type="train_classifier")
+    run_classifier(run)
 
-def run_classifier():
+
+def run_classifier(run):
     trainer_config = config.TRAINER_CONFIG
     model_config = config.MODEL_CONFIG
     optimizer_config = config.OPTIMIZER_CONFIG
@@ -119,37 +124,8 @@ def run_classifier():
     print(trainer_config["device"])
 
     train(model, train_dataloader, test_dataloader, optimizer, trainer_config["device"], model_config["gradient_accumulation"], epochs=model_config["max_epochs"])
+    helper.log_model(run,model,optimizer)
     wandb.finish()
-
-    """
-    trainer_config = config.TRAINER_CONFIG
-    
-    with wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=sweep_config):
-        sweep_config=wandb.config        
-        model_config = config.MODEL_CONFIG
-        model_config["lr"]=sweep_config.learning_rate
-        model_config["batch_size"]=sweep_config.batch_size
-        optimizer_config = config.OPTIMIZER_CONFIG
-        optimizer_config["use_optimizer"]=sweep_config.optimizer
-        optimizer_config["weight_decay"]=sweep_config.weight_decay
-        train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=model_config["batch_size"], num_workers=model_config["num_workers"])
-        model = get_model(img_shape, True, fc_layer_size=sweep_config.fc_layer_size, conv_dropout=sweep_config.conv_dropout, fully_dropout=sweep_config.fully_dropout)
-        optimizer=helper.choose_optimizer(optimizer_config, model.parameters(), model_config["gradient_accumulation"], learning_rate=model_config["lr"])
-        #logging_config = log_metadata(model, model_config, optimizer)
-
-        #wandb.config = model_config
-        
-        
-        #wandb.watch(model, criterion=None, log="gradients", log_freq=1000, idx=None, log_graph=(True))
-    
-
-
-        print("You are currently using the optimizer: {}".format(optimizer))
-        print(trainer_config["device"])
-
-        train(model, train_dataloader, test_dataloader, optimizer, trainer_config["device"], model_config["gradient_accumulation"], epochs=model_config["max_epochs"])
-        #wandb.finish()
-        """
 
 
 # decreases logging for better performance! mostly relevant for small dsets
