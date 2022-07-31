@@ -1,4 +1,5 @@
 from __future__ import print_function, division
+import argparse
 from calendar import c
 from distutils.file_util import copy_file
 import logging
@@ -14,7 +15,6 @@ from torchvision import transforms, utils
 from torchvision import transforms
 from torchvision.datasets import MNIST
 from torch.utils.data import Dataset, DataLoader
-from kaggle.api.kaggle_api_extended import KaggleApi
 from skimage import io, transform
 import torch
 import os
@@ -155,4 +155,10 @@ GPUS = 1
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='configure project')
+    parser.add_argument('--ds_path', default=config.DATA_CONFIG["ds_path"],
+                        help='the location where the dataset is or should be located')
+
+    args = parser.parse_args()
+    config.DATA_CONFIG["ds_path"] = args.ds_path
     run_classifier()
