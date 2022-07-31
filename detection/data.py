@@ -11,13 +11,10 @@ from torchvision import transforms, utils
 from torchvision import transforms
 from torchvision.datasets import MNIST
 from torch.utils.data import Dataset, DataLoader
-from kaggle.api.kaggle_api_extended import KaggleApi
 from skimage import io, transform
 import os
 import pandas as pd
 import config
-
-ds_path = 'datasets/cancer'
 
 
 # https://lindevs.com/download-dataset-from-kaggle-using-api-and-python/
@@ -49,11 +46,24 @@ def load_competition_from_kaggle(competition, path):
 
 def load_cancer_ds():
     competition = 'histopathologic-cancer-detection'
-    path = ds_path
+    path = config.DATA_CONFIG["ds_path"]
 
     if not os.path.exists(path):
         load_competition_from_kaggle(competition, path)
 
+#decorates another Dataset and caches its results
+class CachingDataset(Dataset):
+    def __init__(self, dataset):
+        self.dataset = dataset
+        self.cache = {}
+    
+    def __len__(self):
+        return self.dataset.__len__()
+
+    def __getitem__(self,idx):
+        if idx not in self.cache:
+            self.cache[idx] = self.dataset.__getitem__(idx)
+        return self.cache[idx]
 
 # https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
 class CancerDataset(Dataset):
@@ -86,7 +96,11 @@ def get_ds():
     load_cancer_ds()
     transforms = torchvision.transforms.Compose(
         [torchvision.transforms.ToTensor(), torchvision.transforms.Resize([96, 96])])
-    full_ds = CancerDataset(os.path.join(ds_path, "train"), os.path.join(ds_path, "train_labels.csv"), transforms)
+    path = config.DATA_CONFIG["ds_path"]
+    use_cache = config.DATA_CONFIG["use_cache"]
+    full_ds = CancerDataset(os.path.join(path, "train"), os.path.join(path, "train_labels.csv"), transforms)
+    if use_cache:
+        full_ds = CachingDataset(full_ds)
     train_ds, test_ds = split_ds(full_ds)
     return train_ds, test_ds
 
