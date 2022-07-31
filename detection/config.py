@@ -26,6 +26,8 @@ TRAINER_CONFIG = dict(
     project=PRJ,
     entity="histo-cancer-detection",
     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
+    continue_training = False,
+    accuracy_goal = 0.95
 )
 
 #supports adam, adadelta, rmsprop, adagrad, sgd (with weight decay and momentum)
@@ -46,8 +48,8 @@ OPTIMIZER_CONFIG = dict(
 
 #default values
 DATA_CONFIG = dict(
-    train_portion = 0.01,
-    test_portion = 0.01,
+    train_portion = 0.66,
+    test_portion = 0.33,
     ds_path = 'datasets/cancer',
     use_cache = True
 )
@@ -56,7 +58,6 @@ DATA_CONFIG = dict(
 SWEEP_CONFIG = dict(
     train_portion = 0.001,
     test_portion = 0.001,
-    epochs = 1
-    ,
+    epochs = 1,
     runs = 1000
 )

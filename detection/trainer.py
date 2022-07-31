@@ -23,7 +23,8 @@ import os
 import pandas as pd
 from torch import nn
 from config import MODEL_CONFIG
-from detection.config import SP_MODEL_CONFIG
+from detection.config import SP_MODEL_CONFIG, TRAINER_CONFIG
+from detection.helper import load_model
 from helper import log_metadata
 import model
 import data
@@ -34,7 +35,7 @@ import helper
 
 
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
-def get_model(img_shape, normalize, fc_layer_size=config.SP_MODEL_CONFIG["fc_layer_size"], conv_dropout=config.SP_MODEL_CONFIG["conv_dropout"], fully_dropout=config.SP_MODEL_CONFIG["fully_dropout"]):
+def get_model():
     #first parameters?
     #insert values from SP_MODEL_CONFIG here if necessary
     return MODEL_CONFIG["model_class"](**SP_MODEL_CONFIG)
@@ -96,21 +97,31 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
         wandb.log({"train loss per epoch": train_epoch_loss})
         print('epoch {}, train loss {}'.format(epoch+1,  train_epoch_loss))
 
-        test.test_loop(model, test_dataloader, loss_fn, device, epoch)
+        test_loss_epoch, epoch_acc = test.test_loop(model, test_dataloader, loss_fn, device, epoch)
+        if epoch_acc > TRAINER_CONFIG["accuracy_goal"]:
+            return
 
 def classifier():
     trainer_config = config.TRAINER_CONFIG
-    run = wandb.init(project=trainer_config["project"], entity=trainer_config["entity"], job_type="train_classifier")
-    run_classifier(run)
+    continue_training = config.TRAINER_CONFIG["continue_training"]
+    if continue_training:
+        job_type = "train_classifier"
+    else:
+        job_type = "resume_training_classifier"
+    run = wandb.init(project=trainer_config["project"], entity=trainer_config["entity"], job_type=job_type)
+    run_classifier(run,continue_training)
 
 
-def run_classifier(run):
+def run_classifier(run,continue_training):
     trainer_config = config.TRAINER_CONFIG
     model_config = config.MODEL_CONFIG
     optimizer_config = config.OPTIMIZER_CONFIG
 
     train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=model_config["batch_size"], num_workers=model_config["num_workers"])
-    model = get_model(img_shape, True)
+    if continue_training:
+        model = helper.load_model(run)
+    else:
+        model = get_model()
     optimizer = helper.choose_optimizer(optimizer_config, model.parameters(), model_config["gradient_accumulation"], learning_rate=model_config["lr"])
     logging_config = helper.log_metadata(model_config, optimizer)
  
@@ -125,6 +136,7 @@ def run_classifier(run):
 
     train(model, train_dataloader, test_dataloader, optimizer, trainer_config["device"], model_config["gradient_accumulation"], epochs=model_config["max_epochs"])
     helper.log_model(run,model,optimizer)
+    
     wandb.finish()
 
 

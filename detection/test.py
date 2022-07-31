@@ -1,4 +1,3 @@
-from bitarray import test
 import torch
 from helper import predicted_lables
 import wandb

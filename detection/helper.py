@@ -59,7 +59,7 @@ def load_model(run):
     return load_model_from_artifact(run,MODEL_CONFIG["model_class"])
 
 def load_model_from_artifact(run,model_class):
-    model_artifact = run.use_artifact(str(model_class)+":latest")
+    model_artifact = run.use_artifact(str(model_class.__name__)+":latest")
     model_dir = model_artifact.download()
     model_path = os.path.join(model_dir, "trained_model.pth")
     model_config = model_artifact.metadata
@@ -67,3 +67,4 @@ def load_model_from_artifact(run,model_class):
 
     model = model_class(**model_config)
     model.load_state_dict(torch.load(model_path))
+    return model
