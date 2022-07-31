@@ -99,7 +99,7 @@ def run_classifier():
     optimizer_config = config.OPTIMIZER_CONFIG
     data_config = config.DATA_CONFIG
 
-    train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=model_config["batch_size"], num_workers=model_config["num_workers"], train_portion=data_config["train_portion"], test_portion=data_config["test_portion"])
+    train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=model_config["batch_size"], num_workers=model_config["num_workers"])
     model = get_model(img_shape, True)
     optimizer = helper.choose_optimizer(optimizer_config, model.parameters(), model_config["gradient_accumulation"], learning_rate=model_config["lr"])
     logging_config = helper.log_metadata(model, model_config, optimizer)
@@ -161,4 +161,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     config.DATA_CONFIG["ds_path"] = args.ds_path
+    print(config.DATA_CONFIG["ds_path"])
     run_classifier()
