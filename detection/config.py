@@ -44,7 +44,8 @@ OPTIMIZER_CONFIG = dict(
 DATA_CONFIG = dict(
     train_portion = 0.66,
     test_portion = 0.33,
-    ds_path = 'datasets/cancer'
+    ds_path = 'datasets/cancer',
+    use_cache = True
 )
 
 #default values
