@@ -9,13 +9,11 @@ MODEL_CONFIG = dict(
     gradient_accumulation = 1, #https://stackoverflow.com/questions/63815311/what-is-the-correct-way-to-implement-gradient-accumulation-in-pytorch approach no 1. was chosen
     num_workers=4,
     lr=0.01,
-    max_epochs=1,
+    max_epochs=100,
     model_class = model.Big_Konrad
 )
 
-#specific for different models, just put in all the values
-#you want to adjust, that are not captured above
-#default values
+#constructor arguments for model selected with MODEL_CONFIG["model_class"]
 SP_MODEL_CONFIG = dict(
     conv_dropout=0,
     fully_dropout=0.5,
@@ -26,8 +24,8 @@ TRAINER_CONFIG = dict(
     project=PRJ,
     entity="histo-cancer-detection",
     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
-    continue_training = False,
-    accuracy_goal = 0.95
+    continue_training = False,  #if set to true the latest model for MODEL_CONFIG["model_class"] will be downloaded and used for training
+    accuracy_goal = 0.95 #model will be saved once this testing accuracy has been reached
 )
 
 #supports adam, adadelta, rmsprop, adagrad, sgd (with weight decay and momentum)
