@@ -1,4 +1,3 @@
-from cgi import test
 import wandb
 import trainer
 import config

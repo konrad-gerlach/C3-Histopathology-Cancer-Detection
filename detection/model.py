@@ -19,7 +19,7 @@ class Model(nn.Module):
         logits = self.layers(x)
         return logits 
 
-class Big_Konrad(Model):
+class Big_K(Model):
     def __init__(self,fc_layer_size , conv_dropout, fully_dropout):
         super(Model, self).__init__()
         print("->", self.__class__.__name__)

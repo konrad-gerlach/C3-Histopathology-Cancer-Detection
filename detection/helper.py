@@ -2,8 +2,6 @@ import os
 import torch
 import wandb
 import config
-from config import MODEL_CONFIG
-from detection.config import SP_MODEL_CONFIG
 
 def predicted_lables(pred):
     pred = torch.sigmoid(pred)
@@ -42,7 +40,7 @@ def log_metadata(model_config, optimizer):
 
 
 def log_model(run,model,optimizer):
-    log_model_as_artifact(run,model,str(MODEL_CONFIG["model_class"].__name__),"the trained parameters",SP_MODEL_CONFIG)
+    log_model_as_artifact(run,model,str(config.MODEL_CONFIG["model_class"].__name__),"the trained parameters",config.SP_MODEL_CONFIG)
 
 def log_model_as_artifact(run,model,name,description,config):
     model_artifact = wandb.Artifact(
@@ -56,7 +54,7 @@ def log_model_as_artifact(run,model,name,description,config):
 
 
 def load_model(run):
-    return load_model_from_artifact(run,MODEL_CONFIG["model_class"])
+    return load_model_from_artifact(run,config.MODEL_CONFIG["model_class"])
 
 def load_model_from_artifact(run,model_class):
     model_artifact = run.use_artifact(str(model_class.__name__)+":latest")
