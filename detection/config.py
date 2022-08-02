@@ -14,9 +14,9 @@ MODEL_CONFIG = dict(
 
 #constructor arguments for model selected with MODEL_CONFIG["model_class"]
 SP_MODEL_CONFIG = dict(
-    conv_dropout=0.1,
-    fully_dropout=0.6,
-    fc_layer_size=512
+    conv_dropout=0,
+    fully_dropout=0,
+    fc_layer_size=200
 )
 
 TRAINER_CONFIG = dict(
@@ -40,7 +40,7 @@ OPTIMIZER_CONFIG = dict(
     betas= (0.9, 0.999), #For Adam
     rho=0.9, #For Adadelta
     eps=1e-08,
-    weight_decay=0.00550143838583892,
+    weight_decay=0,
     amsgrad=False,
     momentum=0,
     lr_decay=0.1,
