@@ -9,24 +9,32 @@ from abc import ABC, abstractmethod
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
-        self.layers = self.get_layers()
+        self.layers = nn.ModuleList(self.get_layers())
 
     @abstractmethod
     def get_layers(self):
         pass
 
     def forward(self, x):
-        logits = self.layers(x)
-        return logits 
+        logits = nn.Sequential(*self.layers)(x)
+        return logits
+    
+    def forward_per_layer(self,x):
+        outputs = []
+        previous_layer_output = x
+        for layer in self.layers:
+            previous_layer_output = layer(previous_layer_output)
+            outputs.append(previous_layer_output)
+        return outputs
 
 class Big_Konrad(Model):
     def __init__(self,fc_layer_size , conv_dropout, fully_dropout):
         super(Model, self).__init__()
         print("->", self.__class__.__name__)
-        self.layers = self.get_layers(s=fc_layer_size, c=conv_dropout, f=fully_dropout)
+        self.layers = nn.ModuleList(self.get_layers(s=fc_layer_size, c=conv_dropout, f=fully_dropout))
 
     def get_layers(self, s, c, f):
-        return nn.Sequential(
+        return [
             nn.Dropout2d(p=c),
             nn.Conv2d(3,128,kernel_size=7,padding='same', bias=False),
             nn.BatchNorm2d(128),
@@ -62,7 +70,7 @@ class Big_Konrad(Model):
             nn.LeakyReLU(0.2, inplace=True),
             nn.Dropout(p=f),
             nn.Linear(2*s, 1)
-        )
+        ]
 
 class Small_LeNet(Model):
     

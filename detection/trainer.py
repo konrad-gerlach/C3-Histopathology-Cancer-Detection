@@ -25,7 +25,7 @@ import wandb
 import config
 import test
 import helper
-
+import generic_train_loop
 
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
 def get_model():
@@ -34,61 +34,57 @@ def get_model():
     return config.MODEL_CONFIG["model_class"](**config.SP_MODEL_CONFIG)
 
 def train(model, train_dataloader, test_dataloader, optimizer, device, gradient_accumulation,epochs=5):
-    loss_fn = nn.BCEWithLogitsLoss()
-    train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, device, epochs,gradient_accumulation)
+    loss_fn = training_loss_function
+    train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, device, epochs, gradient_accumulation)
+
+def training_loss_function(outputs,y):
+    return nn.BCEWithLogitsLoss()(outputs[-1],y)
+
+def training_logger(outputs,loss,batch,X,y,inputs):
+    inputs["train_epoch_loss"] += float(loss)
+    
+    pred = outputs[-1]
+    pred = helper.predicted_lables(pred)
+    
+    batch_acc_accum = float((pred == y).sum())
+    inputs["acc_accum"] += float(batch_acc_accum)
+
+    print(str(batch), end='\r')
+    size = inputs["size"]
+
+    # loss and accuracy for some batches
+    if batch % 100 == 0:
+        loss  = loss.item()
+        current = batch * len(X)
+        batch_acc = batch_acc_accum / len(X)
+        train_acc = inputs["acc_accum"] / (current + len(X))
+        print(f"train loss: {loss:>7f} train accuracy: {train_acc:>7f} [{current:>5d}/{size:>5d}]")
+        wandb.log({"loss": loss})
+        wandb.log({"train accuracy per batch":batch_acc})
+        wandb.log({"train accuracy rolling avg per epoch": train_acc})
+    
+    return inputs
 
 
 def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, device, epochs,gradient_accumulation=1):
     model = model.to(device)
-    size = len(train_dataloader.dataset)
-
     for epoch in range(epochs):
-        acc_accum = 0
         train_iter = enumerate(train_dataloader)
-        train_epoch_loss = 0        
+        inputs = dict(
+            acc_accum = 0,
+            train_epoch_loss = 0,
+            size = len(train_dataloader.dataset)
+        )
+       
         model.train()
         wandb.log({"epoch": epoch})
-        for batch, (X, y) in train_iter:
-            # Compute prediction and loss
-            X = X.to(device, non_blocking=True)
-            y = y.to(device, non_blocking=True)
-            y = y.view(-1, 1).to(torch.float)
-
-            pred = model(X)
-            loss = loss_fn(pred, y)
-            # fix oom https://pytorch.org/docs/stable/notes/faq.html
-            train_epoch_loss += float(loss)
-
-            # Backpropagation with gradient accumulation
-            loss.backward()
-            if batch % gradient_accumulation == 0:
-                optimizer.step()
-                optimizer.zero_grad()
-            
-
-            pred = helper.predicted_lables(pred)
-            batch_acc_accum = float((pred == y).sum())
-            acc_accum += float(batch_acc_accum)
-            
-
-            print(str(batch), end='\r')
-
-
-            # loss and accuracy for some batches
-            if batch % 100 == 0:
-                loss  = loss.item()
-                current = batch * len(X)
-                batch_acc = batch_acc_accum / len(X)
-                train_acc = acc_accum / (current + len(X))
-                print(f"train loss: {loss:>7f} train accuracy: {train_acc:>7f} [{current:>5d}/{size:>5d}]")
-                wandb.log({"loss": loss})
-                wandb.log({"train accuracy per batch":batch_acc})
-                wandb.log({"train accuracy rolling avg per epoch": train_acc})
+        
+        inputs = generic_train_loop.train_loop(train_iter,device,model,loss_fn,gradient_accumulation,optimizer,training_logger,inputs)
         
         # loss while training
-        train_epoch_loss /= batch + 1
-        wandb.log({"train loss per epoch": train_epoch_loss})
-        print('epoch {}, train loss {}'.format(epoch+1,  train_epoch_loss))
+        inputs["train_epoch_loss"] /= len(train_iter)
+        wandb.log({"train loss per epoch": inputs["train_epoch_loss"]})
+        print('epoch {}, train loss {}'.format(epoch+1,  inputs["train_epoch_loss"]))
 
         test_loss_epoch, epoch_acc = test.test_loop(model, test_dataloader, loss_fn, device, epoch)
         if epoch_acc > config.TRAINER_CONFIG["accuracy_goal"]:
@@ -116,6 +112,9 @@ def run_classifier(run,continue_training):
         model = helper.load_model(run)
     else:
         model = get_model()
+
+    for param in model.parameters():
+        print(type(param),param.size())
     optimizer = helper.choose_optimizer(optimizer_config, model.parameters(), model_config["gradient_accumulation"], learning_rate=model_config["lr"])
     logging_config = helper.log_metadata(model_config, optimizer)
  
