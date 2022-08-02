@@ -19,6 +19,7 @@ import torch
 import os
 import pandas as pd
 from torch import nn
+import feature_visualization
 import model
 import data
 import wandb
@@ -79,7 +80,8 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
         model.train()
         wandb.log({"epoch": epoch})
         
-        inputs = generic_train_loop.train_loop(train_iter,device,model,loss_fn,gradient_accumulation,optimizer,training_logger,inputs)
+        for batch, (X, y) in train_iter:
+            inputs = generic_train_loop.train_loop(batch,X,y,device,model,loss_fn,gradient_accumulation,optimizer,training_logger,inputs)
         
         # loss while training
         inputs["train_epoch_loss"] /= len(train_iter)
@@ -113,8 +115,6 @@ def run_classifier(run,continue_training):
     else:
         model = get_model()
 
-    for param in model.parameters():
-        print(type(param),param.size())
     optimizer = helper.choose_optimizer(optimizer_config, model.parameters(), model_config["gradient_accumulation"], learning_rate=model_config["lr"])
     logging_config = helper.log_metadata(model_config, optimizer)
  
@@ -147,4 +147,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     config.DATA_CONFIG["ds_path"] = args.ds_path
     print(config.DATA_CONFIG["ds_path"])
-    classifier()
+    feature_visualization.visualizer()

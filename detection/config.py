@@ -14,8 +14,8 @@ MODEL_CONFIG = dict(
 
 #constructor arguments for model selected with MODEL_CONFIG["model_class"]
 SP_MODEL_CONFIG = dict(
-    conv_dropout=0,
-    fully_dropout=0,
+    conv_dropout=0.1,
+    fully_dropout=0.6,
     fc_layer_size=200
 )
 
