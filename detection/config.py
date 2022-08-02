@@ -33,7 +33,7 @@ TRAINER_CONFIG = dict(
 #https://pytorch.org/docs/stable/optim.html
 #default values
 OPTIMIZER_CONFIG = dict(
-    use_optimizer = "", 
+    use_optimizer = "adam", 
     alpha = 0.99, #For RmsProp
     betas= (0.9, 0.999), #For Adam
     rho=0.9, #For Adadelta

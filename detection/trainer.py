@@ -108,6 +108,7 @@ def classifier():
         job_type = "train_classifier"
     else:
         job_type = "resume_training_classifier"
+    wandb.config = {}
     run = wandb.init(project=trainer_config["project"], entity=trainer_config["entity"], job_type=job_type)
     run_classifier(run,continue_training)
 
@@ -126,7 +127,7 @@ def run_classifier(run,continue_training):
     logging_config = helper.log_metadata(model_config, optimizer)
  
     #wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=logging_config)
-    wandb.config = logging_config
+    wandb.config.update(logging_config)
    
     wandb.watch(model, criterion=None, log="gradients", log_freq=1000, idx=None, log_graph=(True))
 
