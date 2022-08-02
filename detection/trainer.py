@@ -3,10 +3,8 @@ import argparse
 from calendar import c
 from cmath import log
 from curses.ascii import SP
-from distutils.file_util import copy_file
 import logging
 from data import get_dl, get_ds
-from test import test_loop
 import zipfile
 import torchvision
 import os
@@ -15,17 +13,12 @@ import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 from torchvision import transforms
-from torchvision.datasets import MNIST
 from torch.utils.data import Dataset, DataLoader
 from skimage import io, transform
 import torch
 import os
 import pandas as pd
 from torch import nn
-from config import MODEL_CONFIG
-from detection.config import SP_MODEL_CONFIG, TRAINER_CONFIG
-from detection.helper import load_model
-from helper import log_metadata
 import model
 import data
 import wandb
@@ -38,7 +31,7 @@ import helper
 def get_model():
     #first parameters?
     #insert values from SP_MODEL_CONFIG here if necessary
-    return MODEL_CONFIG["model_class"](**SP_MODEL_CONFIG)
+    return config.MODEL_CONFIG["model_class"](**config.SP_MODEL_CONFIG)
 
 def train(model, train_dataloader, test_dataloader, optimizer, device, gradient_accumulation,epochs=5):
     loss_fn = nn.BCEWithLogitsLoss()
@@ -98,7 +91,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
         print('epoch {}, train loss {}'.format(epoch+1,  train_epoch_loss))
 
         test_loss_epoch, epoch_acc = test.test_loop(model, test_dataloader, loss_fn, device, epoch)
-        if epoch_acc > TRAINER_CONFIG["accuracy_goal"]:
+        if epoch_acc > config.TRAINER_CONFIG["accuracy_goal"]:
             return
 
 def classifier():

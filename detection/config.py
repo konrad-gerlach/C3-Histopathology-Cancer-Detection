@@ -1,5 +1,4 @@
 import torch
-
 import model
 
 PRJ = "histo_cancer"
@@ -8,16 +7,16 @@ MODEL_CONFIG = dict(
     batch_size=64,
     gradient_accumulation = 1, #https://stackoverflow.com/questions/63815311/what-is-the-correct-way-to-implement-gradient-accumulation-in-pytorch approach no 1. was chosen
     num_workers=4,
-    lr=0.01,
+    lr=0.020769733168812123,
     max_epochs=100,
-    model_class = model.Big_Konrad
+    model_class = model.Big_K
 )
 
 #constructor arguments for model selected with MODEL_CONFIG["model_class"]
 SP_MODEL_CONFIG = dict(
-    conv_dropout=0,
-    fully_dropout=0.5,
-    fc_layer_size=200
+    conv_dropout=0.1,
+    fully_dropout=0.6,
+    fc_layer_size=512
 )
 
 TRAINER_CONFIG = dict(
@@ -38,7 +37,7 @@ OPTIMIZER_CONFIG = dict(
     betas= (0.9, 0.999), #For Adam
     rho=0.9, #For Adadelta
     eps=1e-08,
-    weight_decay=0,
+    weight_decay=0.00550143838583892,
     amsgrad=False,
     momentum=0,
     lr_decay=0.1,
