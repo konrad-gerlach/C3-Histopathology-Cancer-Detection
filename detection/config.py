@@ -23,8 +23,11 @@ TRAINER_CONFIG = dict(
     project=PRJ,
     entity="histo-cancer-detection",
     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
-    continue_training = False,  #if set to true the latest model for MODEL_CONFIG["model_class"] will be downloaded and used for training
+    continue_training = False,  #if set to true the latest model for MODEL_CONFIG["model_class"] with alias LOAD_CONFIG["alias"] will be downloaded and used for training
     accuracy_goal = 0.95 #model will be saved once this testing accuracy has been reached
+)
+LOAD_CONFIG = dict(
+    alias="usable"
 )
 
 #supports adam, adadelta, rmsprop, adagrad, sgd (with weight decay and momentum)

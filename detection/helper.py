@@ -54,10 +54,10 @@ def log_model_as_artifact(run,model,name,description,config):
 
 
 def load_model(run):
-    return load_model_from_artifact(run,config.MODEL_CONFIG["model_class"])
+    return load_model_from_artifact(run,config.MODEL_CONFIG["model_class"],config.LOAD_CONFIG["alias"])
 
-def load_model_from_artifact(run,model_class):
-    model_artifact = run.use_artifact(str(model_class.__name__)+":latest")
+def load_model_from_artifact(run,model_class, alias):
+    model_artifact = run.use_artifact(str(model_class.__name__)+":"+alias)
     model_dir = model_artifact.download()
     model_path = os.path.join(model_dir, "trained_model.pth")
     model_config = model_artifact.metadata
