@@ -9,7 +9,7 @@ MODEL_CONFIG = dict(
     num_workers=4,
     lr=0.020769733168812123,
     max_epochs=100,
-    model_class = model.Big_K
+    model_class = model.Big_Konrad
 )
 
 #constructor arguments for model selected with MODEL_CONFIG["model_class"]
