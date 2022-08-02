@@ -96,9 +96,9 @@ def classifier():
     trainer_config = config.TRAINER_CONFIG
     continue_training = config.TRAINER_CONFIG["continue_training"]
     if continue_training:
-        job_type = "train_classifier"
-    else:
         job_type = "resume_training_classifier"
+    else:
+        job_type = "train_classifier"
     wandb.config = {}
     run = wandb.init(project=trainer_config["project"], entity=trainer_config["entity"], job_type=job_type)
     run_classifier(run,continue_training)

@@ -8,7 +8,7 @@ import helper
 import generic_train_loop
 
 def sample(img_shape,device):
-    return torch.ones(img_shape,device=device,requires_grad=True)
+    return torch.rand(img_shape,device=device,requires_grad=True)
 
 
 def visualizer():
@@ -24,7 +24,7 @@ def run_visualizer(run):
     optimizer_config = config.OPTIMIZER_CONFIG
     model = helper.load_model(run)
 
-    input = sample((3,96,96),trainer_config["device"])
+    input = sample((4,3,96,96),trainer_config["device"])
     optimizer = helper.choose_optimizer(optimizer_config,[input], model_config["gradient_accumulation"], learning_rate=model_config["lr"])
     logging_config = helper.log_metadata(model_config, optimizer)
  
@@ -50,16 +50,21 @@ def visualize(model, optimizer, input, device, gradient_accumulation,epochs=5):
 def logger(outputs,loss,batch,X,y,inputs):
     X = torch.clamp(X,0,1)
     wandb.log({"loss":loss})
-    wandb.log({"inputs" : [wandb.Image(x) for x in X]})
+    wandb.log({"inputs_transformed" : [wandb.Image(x) for x in X]})
 
 def visualizer_loop(model, loss_fn, input, optimizer, device, epochs, gradient_accumulation):
     model = model.to(device)
-    input = input.view(1,*input.shape)
     y = torch.zeros(1)
     inputs = dict()
     model.eval()
-    for i in range(100000):
-        generic_train_loop.train_loop(1,input.clamp(0,1),y,device,model,loss_fn,gradient_accumulation, optimizer, logger, inputs)
+    for i in range(2500):
+        wandb.log({"inputs" : [wandb.Image(x) for x in input]})
+        X = random_transform(input.clamp(0,1))
+        generic_train_loop.train_loop(1,X,y,device,model,loss_fn,gradient_accumulation, optimizer, logger, inputs)
+
+def random_transform(inputs):
+    inputs = torchvision.transforms.RandomAffine(2,translate=(0.1,0.1),scale=(0.8,1.2))(inputs)
+    return inputs
 
 
 def show(images):    
