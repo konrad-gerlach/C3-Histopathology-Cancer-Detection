@@ -56,8 +56,8 @@ DATA_CONFIG = dict(
 
 #default values
 SWEEP_CONFIG = dict(
-    train_portion = 0.001,
-    test_portion = 0.001,
+    train_portion = 0.1,
+    test_portion = 0.1,
     epochs = 1,
     runs = 1000
 )

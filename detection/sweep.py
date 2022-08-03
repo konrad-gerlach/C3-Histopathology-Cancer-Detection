@@ -1,4 +1,5 @@
 import argparse
+import math
 import wandb
 import trainer
 import config
@@ -17,10 +18,10 @@ def run_sweep():
         'values': ['adam', 'sgd', 'rmspropp']
         },
     'fc_layer_size': {
-        'values': [128, 256, 512]
+        'values': [128, 256, 512, 1028]
         },
     'fully_dropout': {
-          'values': [0.4, 0.5, 0.6]
+          'values': [0.4, 0.5, 0.6, 0.7]
         },
     'conv_dropout': {
         'values': [0.1, 0.2, 0.3]
@@ -30,15 +31,15 @@ def run_sweep():
         },
     'lr': {
         # a flat distribution between 0 and 0.1
-        'distribution': 'uniform',
-        'min': 0,
-        'max': 0.1
+        'distribution': 'log_uniform',
+        'min': math.log(0.0001),
+        'max': math.log(0.1)
       },
     'weight_decay': {
         # a flat distribution between 0 and 0.1
-        'distribution': 'uniform',
-        'min': 0,
-        'max': 0.1
+        'distribution': 'log_uniform',
+        'min': math.log(0.0001),
+        'max': math.log(0.1)
       },
     }
     sweep_config['parameters'] = parameters_dict
