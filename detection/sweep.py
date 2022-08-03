@@ -1,3 +1,4 @@
+import argparse
 import wandb
 import trainer
 import config
@@ -48,7 +49,7 @@ def run_sweep():
 
 def run_classifier_with(sweep_config=None):
     
-    with wandb.init(project=config.TRAINER_CONFIG["project"], entity=config.TRAINER_CONFIG["entity"], config=sweep_config):
+    with wandb.init(project=config.TRAINER_CONFIG["project"], entity=config.TRAINER_CONFIG["entity"], config=sweep_config) as run:
         sweep_config = wandb.config
         #change the configs globally so they can be unsed elsewhere
         config.MODEL_CONFIG["max_epochs"]=config.SWEEP_CONFIG["epochs"]
@@ -65,7 +66,13 @@ def run_classifier_with(sweep_config=None):
         config.SP_MODEL_CONFIG["conv_dropout"] = sweep_config.conv_dropout
         config.SP_MODEL_CONFIG["fully_dropout"] = sweep_config.fully_dropout
 
-        trainer.run_classifier()
+        trainer.run_classifier(run, False)
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='configure project')
+    parser.add_argument('--ds_path', default=config.DATA_CONFIG["ds_path"],
+                        help='the location where the dataset is or should be located')
+
+    args = parser.parse_args()
+    config.DATA_CONFIG["ds_path"] = args.ds_path
     run_sweep()

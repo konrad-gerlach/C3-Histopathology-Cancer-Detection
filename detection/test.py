@@ -9,6 +9,7 @@ def test_loop(model, test_dataloader, loss_fn, device, epoch):
     correct_pred = 0 
     n = 0
 
+    #TODO Refactor to use generic training loop instead
     with torch.no_grad():
         test_loss_epoch = 0.0
         test_iter = enumerate(test_dataloader)
@@ -19,7 +20,7 @@ def test_loop(model, test_dataloader, loss_fn, device, epoch):
 
             pred_test = model(X_test)
 
-            batch_loss = loss_fn(model(X_test), y_test) 
+            batch_loss = loss_fn([model(X_test)], y_test) 
             test_loss_epoch += float(batch_loss)
 
             pred_lables_test = helper.predicted_lables(pred_test)

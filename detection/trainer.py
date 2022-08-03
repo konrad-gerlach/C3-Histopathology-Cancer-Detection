@@ -84,7 +84,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
             inputs = generic_train_loop.train_loop(batch,X,y,device,model,loss_fn,gradient_accumulation,optimizer,training_logger,inputs)
         
         # loss while training
-        inputs["train_epoch_loss"] /= len(train_iter)
+        inputs["train_epoch_loss"] /= len(train_dataloader.dataset)
         wandb.log({"train loss per epoch": inputs["train_epoch_loss"]})
         print('epoch {}, train loss {}'.format(epoch+1,  inputs["train_epoch_loss"]))
 
@@ -147,4 +147,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     config.DATA_CONFIG["ds_path"] = args.ds_path
     print(config.DATA_CONFIG["ds_path"])
-    feature_visualization.visualizer()
+    #feature_visualization.visualizer()
+    classifier()
