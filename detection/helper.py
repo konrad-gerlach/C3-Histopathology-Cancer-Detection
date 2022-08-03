@@ -2,6 +2,7 @@ import os
 import torch
 import wandb
 import config
+import argparse
 
 def predicted_lables(pred):
     pred = torch.sigmoid(pred)
@@ -25,12 +26,12 @@ def choose_optimizer(optimizer_config, parameters, gradient_accumulation, learni
     else:
         return torch.optim.SGD(parameters, lr=learning_rate)
 
-def log_metadata(model_config, optimizer):
+def log_metadata(trainer_config, optimizer_config, optimizer):
     lines = str(optimizer).split("\n")
     logging_config = dict(
-        batch_size= model_config["batch_size"],
-        learning_rate= model_config["lr"],
-        max_epochs= model_config["max_epochs"],
+        batch_size= optimizer_config["batch_size"],
+        learning_rate= optimizer_config["lr"],
+        max_epochs= trainer_config["max_epochs"],
         train_portion=config.DATA_CONFIG["train_portion"],
         test_portion=config.DATA_CONFIG["test_portion"],
         optimizer= lines[0].split(" ")[0],
@@ -66,3 +67,12 @@ def load_model_from_artifact(run,model_class, alias):
     model = model_class(**model_config)
     model.load_state_dict(torch.load(model_path))
     return model
+
+def define_dataset_location():
+    parser = argparse.ArgumentParser(description='configure project')
+    parser.add_argument('--ds_path', default=config.DATA_CONFIG["ds_path"],
+                        help='the location where the dataset is or should be located')
+
+    args = parser.parse_args()
+    config.DATA_CONFIG["ds_path"] = args.ds_path
+    print(config.DATA_CONFIG["ds_path"])

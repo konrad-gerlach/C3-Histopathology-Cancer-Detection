@@ -64,6 +64,8 @@ class Big_Konrad(Model):
             nn.Linear(2*s, 1)
         )
 
+#########################################################################################
+
 class Small_LeNet(Model):
     
     def get_layers(self):
@@ -273,7 +275,7 @@ class No_Conv(Model):
         )   
 
 if __name__ == "__main__":
-    model = Small_LeNet()
+    model = Big_Konrad()
     print(list(model.modules()))
     
     

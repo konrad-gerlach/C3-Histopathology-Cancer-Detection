@@ -1,5 +1,4 @@
 from __future__ import print_function, division
-import argparse
 from calendar import c
 from cmath import log
 from curses.ascii import SP
@@ -58,7 +57,6 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
             loss = loss_fn(pred, y)
             # fix oom https://pytorch.org/docs/stable/notes/faq.html
             train_epoch_loss += float(loss)
-
             # Backpropagation with gradient accumulation
             loss.backward()
             if batch % gradient_accumulation == 0:
@@ -95,31 +93,32 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
             return
 
 def classifier():
-    trainer_config = config.TRAINER_CONFIG
+    wandb_config = config.WANDB_CONFIG
     continue_training = config.TRAINER_CONFIG["continue_training"]
     if continue_training:
         job_type = "train_classifier"
     else:
         job_type = "resume_training_classifier"
     wandb.config = {}
-    run = wandb.init(project=trainer_config["project"], entity=trainer_config["entity"], job_type=job_type)
+    run = wandb.init(project=wandb_config["project"], entity=wandb_config["entity"], job_type=job_type)
     run_classifier(run,continue_training)
 
 
+
 def run_classifier(run,continue_training):
-    trainer_config = config.TRAINER_CONFIG
     model_config = config.MODEL_CONFIG
     optimizer_config = config.OPTIMIZER_CONFIG
+    trainer_config = config.TRAINER_CONFIG
 
-    train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=model_config["batch_size"], num_workers=model_config["num_workers"])
+
+    train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=optimizer_config["batch_size"], num_workers=model_config["num_workers"])
     if continue_training:
         model = helper.load_model(run)
     else:
         model = get_model()
-    optimizer = helper.choose_optimizer(optimizer_config, model.parameters(), model_config["gradient_accumulation"], learning_rate=model_config["lr"])
-    logging_config = helper.log_metadata(model_config, optimizer)
+    optimizer = helper.choose_optimizer(optimizer_config, model.parameters(), gradient_accumulation=trainer_config["gradient_accumulation"], learning_rate=optimizer_config["lr"])
+    logging_config = helper.log_metadata(trainer_config, optimizer_config, optimizer)
  
-    #wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=logging_config)
     wandb.config.update(logging_config)
    
     wandb.watch(model, criterion=None, log="gradients", log_freq=1000, idx=None, log_graph=(True))
@@ -128,7 +127,7 @@ def run_classifier(run,continue_training):
     print("You are currently using the optimizer: {}".format(optimizer))
     print(trainer_config["device"])
 
-    train(model, train_dataloader, test_dataloader, optimizer, trainer_config["device"], model_config["gradient_accumulation"], epochs=model_config["max_epochs"])
+    train(model, train_dataloader, test_dataloader, optimizer, trainer_config["device"], trainer_config["gradient_accumulation"], epochs=trainer_config["max_epochs"])
     helper.log_model(run,model,optimizer)
     
     wandb.finish()
@@ -141,11 +140,5 @@ GPUS = 1
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='configure project')
-    parser.add_argument('--ds_path', default=config.DATA_CONFIG["ds_path"],
-                        help='the location where the dataset is or should be located')
-
-    args = parser.parse_args()
-    config.DATA_CONFIG["ds_path"] = args.ds_path
-    print(config.DATA_CONFIG["ds_path"])
+    helper.define_dataset_location()
     classifier()

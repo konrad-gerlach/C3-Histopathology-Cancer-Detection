@@ -1,14 +1,9 @@
 import torch
 import model
 
-PRJ = "histo_cancer"
 #default values
 MODEL_CONFIG = dict(
-    batch_size=64,
-    gradient_accumulation = 1, #https://stackoverflow.com/questions/63815311/what-is-the-correct-way-to-implement-gradient-accumulation-in-pytorch approach no 1. was chosen
     num_workers=4,
-    lr=0.020769733168812123,
-    max_epochs=100,
     model_class = model.Big_Konrad
 )
 
@@ -19,13 +14,20 @@ SP_MODEL_CONFIG = dict(
     fc_layer_size=512
 )
 
+#rename wandb config
+WANDB_CONFIG = dict(
+    project="histo_cancer",
+    entity="histo-cancer-detection"
+)
+
 TRAINER_CONFIG = dict(
-    project=PRJ,
-    entity="histo-cancer-detection",
+    max_epochs=100,
     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
     continue_training = False,  #if set to true the latest model for MODEL_CONFIG["model_class"] with alias LOAD_CONFIG["alias"] will be downloaded and used for training
-    accuracy_goal = 0.95 #model will be saved once this testing accuracy has been reached
+    accuracy_goal = 0.95, #model will be saved once this testing accuracy has been reached
+    gradient_accumulation = 1, #https://stackoverflow.com/questions/63815311/what-is-the-correct-way-to-implement-gradient-accumulation-in-pytorch approach no 1. was chosen)
 )
+
 LOAD_CONFIG = dict(
     alias="usable"
 )
@@ -35,12 +37,14 @@ LOAD_CONFIG = dict(
 #https://pytorch.org/docs/stable/optim.html
 #default values
 OPTIMIZER_CONFIG = dict(
-    use_optimizer = "adam", 
+    batch_size=64,
+    use_optimizer = "adam",
+    lr=0.020769733168812123,
+    weight_decay=0.00550143838583892,
     alpha = 0.99, #For RmsProp
     betas= (0.9, 0.999), #For Adam
     rho=0.9, #For Adadelta
-    eps=1e-08,
-    weight_decay=0.00550143838583892,
+    eps=1e-08,    
     amsgrad=False,
     momentum=0,
     lr_decay=0.1,

@@ -42,18 +42,25 @@ def run_sweep():
     }
     sweep_config['parameters'] = parameters_dict
 
-    sweep_id = wandb.sweep(sweep_config, project=config.PRJ)
+    sweep_id = wandb.sweep(sweep_config, project=config.WANDB_CONFIG["project"], entity=config.WANDB_CONFIG["entity"])
 
+    #calls run_classifier_with mulitple times with different configs
     wandb.agent(sweep_id, run_classifier_with, count=config.SWEEP_CONFIG["runs"])
 
 def run_classifier_with(sweep_config=None):
+
+    continue_training = config.TRAINER_CONFIG["continue_training"]
+    if continue_training:
+        job_type = "train_classifier"
+    else:
+        job_type = "resume_training_classifier"
     
-    with wandb.init(project=config.TRAINER_CONFIG["project"], entity=config.TRAINER_CONFIG["entity"], config=sweep_config):
+    with wandb.init(project=config.WANDB_CONFIG["project"], entity=config.WANDB_CONFIG["entity"], config=sweep_config, job_type=job_type) as run:
         sweep_config = wandb.config
         #change the configs globally so they can be unsed elsewhere
-        config.MODEL_CONFIG["max_epochs"]=config.SWEEP_CONFIG["epochs"]
-        config.MODEL_CONFIG["lr"]=sweep_config.lr
-        config.MODEL_CONFIG["batch_size"]=sweep_config.batch_size
+        config.TRAINER_CONFIG["max_epochs"]=config.SWEEP_CONFIG["epochs"]
+        config.OPTIMIZER_CONFIG["lr"]=sweep_config.lr
+        config.OPTIMIZER_CONFIG["batch_size"]=sweep_config.batch_size
 
         config.OPTIMIZER_CONFIG["use_optimizer"]=sweep_config.optimizer
         config.OPTIMIZER_CONFIG["weight_decay"]=sweep_config.weight_decay
@@ -65,7 +72,7 @@ def run_classifier_with(sweep_config=None):
         config.SP_MODEL_CONFIG["conv_dropout"] = sweep_config.conv_dropout
         config.SP_MODEL_CONFIG["fully_dropout"] = sweep_config.fully_dropout
 
-        trainer.run_classifier()
+        trainer.run_classifier(run, continue_training)
 
 if __name__ == "__main__":
     run_sweep()
