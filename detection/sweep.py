@@ -13,31 +13,31 @@ def run_sweep():
 
     parameters_dict = {
     'optimizer': {
-        'values': ['adam', 'sgd', 'rmspropp']
+        'values': ['adam']
         },
     'fc_layer_size': {
-        'values': [128, 256, 512]
+        'values': [256]
         },
     'fully_dropout': {
           'values': [0.4, 0.5, 0.6]
         },
     'conv_dropout': {
-        'values': [0.1, 0.2, 0.3]
+        'values': [0, 0.1, 0.2]
     },
     'batch_size': {
-          'values': [4, 16, 64]
+          'values': [64]
         },
     'lr': {
         # a flat distribution between 0 and 0.1
         'distribution': 'uniform',
-        'min': 0,
-        'max': 0.1
+        'min': 0.005,
+        'max': 0.02
       },
     'weight_decay': {
         # a flat distribution between 0 and 0.1
         'distribution': 'uniform',
         'min': 0,
-        'max': 0.1
+        'max': 0.2
       },
     }
     sweep_config['parameters'] = parameters_dict

@@ -9,9 +9,9 @@ MODEL_CONFIG = dict(
 
 #constructor arguments for model selected with MODEL_CONFIG["model_class"]
 SP_MODEL_CONFIG = dict(
-    conv_dropout=0.1,
-    fully_dropout=0.6,
-    fc_layer_size=512
+    conv_dropout=0,
+    fully_dropout=0.5,
+    fc_layer_size=200
 )
 
 #rename wandb config
@@ -21,7 +21,7 @@ WANDB_CONFIG = dict(
 )
 
 TRAINER_CONFIG = dict(
-    max_epochs=10,
+    max_epochs=100,
     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
     continue_training = False,  #if set to true the latest model for MODEL_CONFIG["model_class"] with alias LOAD_CONFIG["alias"] will be downloaded and used for training
     accuracy_goal = 0.95, #model will be saved once this testing accuracy has been reached
@@ -39,8 +39,8 @@ LOAD_CONFIG = dict(
 OPTIMIZER_CONFIG = dict(
     batch_size=64,
     use_optimizer = "adam",
-    lr=0.020769733168812123,
-    weight_decay=0.00550143838583892,
+    lr=0.01,
+    weight_decay=0,
     alpha = 0.99, #For RmsProp
     betas= (0.9, 0.999), #For Adam
     rho=0.9, #For Adadelta
