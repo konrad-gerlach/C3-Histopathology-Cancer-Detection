@@ -6,6 +6,7 @@ import wandb
 import config
 import helper
 import generic_train_loop
+import data
 
 def sample(img_shape,device):
     return torch.rand(img_shape,device=device,requires_grad=True)
@@ -41,17 +42,24 @@ def run_visualizer(run):
     wandb.finish()
 
 def visualizer_loss_fn(outputs,y):
-    #outputs of last linear layer meaning (first 16 neurons)
     layer = outputs[-1]
     loss = torch.zeros(1,device=layer.device)
     for i in range(len(layer)):
         loss += layer[i,i]
     return loss
 
+def data_example_loss_fn(outputs,y):
+    layer = outputs[-1]
+    loss = torch.zeros(len(layer),device=layer.device)
+    for i in range(len(layer)):
+        loss[i] += layer[i][0]
+    return -loss
 
 def visualize(model, optimizer, input, device, gradient_accumulation,epochs=5):
     loss_fn = visualizer_loss_fn
     visualizer_loop(model, loss_fn, input, optimizer, device, epochs, gradient_accumulation)
+    loss_fn = data_example_loss_fn
+    get_data_examples(model,device,loss_fn)
 
 def logger(outputs,loss,batch,X,y,inputs):
     X = torch.clamp(X,0,1)
@@ -63,14 +71,36 @@ def visualizer_loop(model, loss_fn, input, optimizer, device, epochs, gradient_a
     y = torch.zeros(1)
     inputs = dict()
     model.eval()
-    for i in range(2500):
+    for i in range(1500):
         wandb.log({"inputs" : [wandb.Image(x) for x in input]})
         X = random_transform(input.clamp(0,1))
         generic_train_loop.train_loop(1,X,y,device,model,loss_fn,gradient_accumulation, optimizer, logger, inputs)
 
 def random_transform(inputs):
-    #inputs = torchvision.transforms.RandomAffine(2,translate=(0.1,0.1),scale=(0.8,1.2))(inputs)
+    inputs = torchvision.transforms.RandomAffine(2,translate=(0.1,0.1),scale=(0.8,1.2))(inputs)
     return inputs
+
+def get_data_examples(model,device,loss_fn):
+    model = model.to(device)
+    model.eval()
+    train_dl, test_dl, img_shape = data.get_dl(64,4)
+    results = []
+    with torch.no_grad():
+        for batch, (X,y) in enumerate(test_dl):
+            X = X.to(device, non_blocking=True)
+            y = y.to(device, non_blocking=True)
+            y = y.view(-1, 1).to(torch.float)
+
+            outputs = model.forward_per_layer(X)
+            loss = loss_fn(outputs, y)
+            X = X.to("cpu", non_blocking=True)
+            y = y.to("cpu", non_blocking=True)
+            loss = loss.to("cpu", non_blocking=True)
+            for i in range(len(X)):
+                results.append((X[i],loss[i],y[i]))
+    results.sort(key= lambda img_and_loss_tuple: img_and_loss_tuple[1])
+    wandb.log({"minimzer_images" : [wandb.Image(img_and_loss_tuple[0],caption=("cancer: "+str(img_and_loss_tuple[2].item()))+ " loss: " + str(img_and_loss_tuple[1].item())) for img_and_loss_tuple in results[:10]]})
+   
 
 
 def show(images):    
