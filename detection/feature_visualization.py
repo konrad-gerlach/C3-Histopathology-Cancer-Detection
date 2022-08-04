@@ -53,7 +53,7 @@ def data_example_loss_fn(outputs,y):
     loss = torch.zeros(len(layer),device=layer.device)
     for i in range(len(layer)):
         loss[i] += layer[i][0]
-    return -loss
+    return loss
 
 def visualize(model, optimizer, input, device, gradient_accumulation,epochs=5):
     loss_fn = visualizer_loss_fn
@@ -77,6 +77,7 @@ def visualizer_loop(model, loss_fn, input, optimizer, device, epochs, gradient_a
         generic_train_loop.train_loop(1,X,y,device,model,loss_fn,gradient_accumulation, optimizer, logger, inputs)
 
 def random_transform(inputs):
+    inputs = torchvision.transforms.GaussianBlur(5)(inputs)
     inputs = torchvision.transforms.RandomAffine(2,translate=(0.1,0.1),scale=(0.8,1.2))(inputs)
     return inputs
 
