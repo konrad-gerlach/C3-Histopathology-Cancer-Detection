@@ -23,9 +23,9 @@ TRAINER_CONFIG = dict(
     project=PRJ, #wandb project
     entity="histo-cancer-detection", #wandb entity
     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
-    mode = "training", #supports sweeps, training and feature_visualization
+    mode = "feature_visualization", #supports sweeps, training and feature_visualization
     continue_training = True,  #if set to true the latest model for MODEL_CONFIG["model_class"] with alias LOAD_CONFIG["alias"] will be downloaded and used for training
-    accuracy_goal = 0.92 #model will be saved once this testing accuracy has been reached
+    accuracy_goal = 0.95 #model will be saved once this testing accuracy has been reached
 )
 
 MODEL_ARTIFACT_CONFIG = dict(

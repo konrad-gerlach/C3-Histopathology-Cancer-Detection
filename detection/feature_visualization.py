@@ -24,7 +24,7 @@ def run_visualizer(run):
     optimizer_config = config.OPTIMIZER_CONFIG
     model = helper.load_model(run)
 
-    input = sample((4,3,96,96),trainer_config["device"])
+    input = sample((1,3,96,96),trainer_config["device"])
     optimizer = helper.choose_optimizer(optimizer_config,[input], model_config["gradient_accumulation"], learning_rate=model_config["lr"])
     logging_config = helper.log_metadata(model_config, optimizer)
  
@@ -41,7 +41,13 @@ def run_visualizer(run):
     wandb.finish()
 
 def visualizer_loss_fn(outputs,y):
-    return (-outputs[-1]).mean()
+    #outputs of last linear layer meaning (first 16 neurons)
+    layer = outputs[-1]
+    loss = torch.zeros(1,device=layer.device)
+    for i in range(len(layer)):
+        loss += layer[i,i]
+    return loss
+
 
 def visualize(model, optimizer, input, device, gradient_accumulation,epochs=5):
     loss_fn = visualizer_loss_fn
@@ -63,7 +69,7 @@ def visualizer_loop(model, loss_fn, input, optimizer, device, epochs, gradient_a
         generic_train_loop.train_loop(1,X,y,device,model,loss_fn,gradient_accumulation, optimizer, logger, inputs)
 
 def random_transform(inputs):
-    inputs = torchvision.transforms.RandomAffine(2,translate=(0.1,0.1),scale=(0.8,1.2))(inputs)
+    #inputs = torchvision.transforms.RandomAffine(2,translate=(0.1,0.1),scale=(0.8,1.2))(inputs)
     return inputs
 
 
