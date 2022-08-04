@@ -75,7 +75,7 @@ class Big_Konrad(Model):
 class Small_LeNet(Model):
     
     def get_layers(self):
-        return nn.Sequential(
+        return [
             nn.Conv2d(3, 6, kernel_size=5, stride=1, padding=0),
             nn.BatchNorm2d(6),
             nn.ReLU(),
@@ -92,12 +92,12 @@ class Small_LeNet(Model):
             nn.Linear(120, 84),
             nn.ReLU(),
             nn.Linear(84, 1)
-        )
+        ]
 
 class BigLeNet(Model):
     
     def get_layers(self):
-        return nn.Sequential(
+        return [
             nn.Conv2d(3, 18, kernel_size=5, stride=1, padding=0),
             nn.BatchNorm2d(18),
             nn.ReLU(),
@@ -114,12 +114,12 @@ class BigLeNet(Model):
             nn.Linear(6350, 4445),
             nn.ReLU(),
             nn.Linear(4445, 1)
-        )    
+        ]   
 
 class Big_Uff(Model):
     
     def get_layers(self):
-        return nn.Sequential(
+        return [
             nn.Dropout2d(p=c),
             nn.Conv2d(3, 32, kernel_size=11, stride=1, padding=0, bias=False),
             nn.BatchNorm2d(32),
@@ -149,13 +149,13 @@ class Big_Uff(Model):
             nn.ReLU(),
             nn.Dropout(p=f),
             nn.Linear(s, 1)
-        ) 
+        ] 
 
 # inspired by: https://blog.ineuron.ai/AlexNet-CNN-architecture-With-Implementation-in-Keras-Q4strWr4iZ
 class Alex_Net(Model):
 
     def get_layers(self):
-        return nn.Sequential(
+        return [
             nn.Conv2d(3,96,kernel_size=7,stride=4,padding=0, bias=False),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2,stride=2,padding=0),
@@ -175,14 +175,14 @@ class Alex_Net(Model):
             nn.Linear(1024, 1024),
             nn.ReLU(),
             nn.Linear(1024, 1)
-        )
+        ]
 
 
 
 class Very_Big_Konrad(Model):
 
     def get_layers(self):
-        return nn.Sequential(
+        return [
             nn.Conv2d(3,128,kernel_size=7,padding='same'),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(0.2, inplace=True),
@@ -221,12 +221,12 @@ class Very_Big_Konrad(Model):
             nn.LeakyReLU(0.2, inplace=True),
             nn.Dropout(p=0.5),
             nn.Linear(400, 1)
-        )
+        ]
 
 class VGG_16(Model):
 
     def get_layers(self):
-        return nn.Sequential(
+        return [
             nn.Conv2d(3,64,kernel_size=3,padding="same"),
             nn.ReLU(),
             nn.Conv2d(64,64,kernel_size=3,padding="same"),
@@ -268,17 +268,17 @@ class VGG_16(Model):
             nn.Linear(4608, 4608),
             nn.ReLU(),
             nn.Linear(4608, 1)
-        )
+        ]
 
 class No_Conv(Model):
     
     def get_layers(self):
-        return nn.Sequential(           
+        return [           
             nn.Flatten(),
             nn.Linear(27648, 9216),
             nn.ReLU(),
             nn.Linear(9216, 1)
-        )   
+        ] 
 
 if __name__ == "__main__":
     model = Small_LeNet()
