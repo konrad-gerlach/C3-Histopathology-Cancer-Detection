@@ -27,7 +27,7 @@ def run_sweep():
         'values': [0.1, 0.2, 0.3]
     },
     'batch_size': {
-          'values': [4, 16, 64]
+          'values': [8, 16, 64]
         },
     'lr': {
         # a flat distribution between 0 and 0.1
@@ -46,7 +46,7 @@ def run_sweep():
 
     sweep_id = wandb.sweep(sweep_config, project=config.PRJ)
 
-    wandb.agent(sweep_id, run_classifier_with, count=config.SWEEP_CONFIG["runs"])
+    wandb.agent(sweep_id, run_classifier_with, count=config.SWEEP_CONFIG["runs"], project=config.TRAINER_CONFIG["project"],entity=config.TRAINER_CONFIG["entity"])
 
 def run_classifier_with(sweep_config=None):
     

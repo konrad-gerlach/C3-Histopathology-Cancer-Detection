@@ -27,7 +27,8 @@ TRAINER_CONFIG = dict(
     accuracy_goal = 0.95 #model will be saved once this testing accuracy has been reached
 )
 LOAD_CONFIG = dict(
-    alias="usable"
+    alias="usable",
+    name = "Big_Konrad"
 )
 
 #supports adam, adadelta, rmsprop, adagrad, sgd (with weight decay and momentum)
@@ -58,6 +59,6 @@ DATA_CONFIG = dict(
 SWEEP_CONFIG = dict(
     train_portion = 0.1,
     test_portion = 0.1,
-    epochs = 1,
+    epochs = 2,
     runs = 1000
 )
