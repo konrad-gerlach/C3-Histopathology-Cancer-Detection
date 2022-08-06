@@ -1,3 +1,4 @@
+import re
 import matplotlib.pyplot as plt
 import torch
 import config
@@ -8,6 +9,7 @@ import helper
 
 # Inspired by: https://towardsdatascience.com/saliency-map-using-pytorch-68270fe45e80
 def setup():
+    
     wandb_config = config.WANDB_CONFIG
     job_type = "saliency"
     run = wandb.init(project=wandb_config["project"], entity=wandb_config["entity"], job_type=job_type)
@@ -18,25 +20,51 @@ def setup():
 
     # Set the model on Eval Mode
     model.eval()
-    wandb.finish()
     # Open the image file
     data_loader, _, _ = data.get_dl(batch_size=1, num_workers=1)
+    wandb.finish()
 
     return data_loader, device, model
 
 
 def show_saliencies(images):
-    fig, ax = plt.subplots(2, len(images))
+    fig, ax = plt.subplots(5, len(images))
     for i, image in enumerate(images):
-        saliency, _ = torch.max(image.grad.data.abs(), dim=1)
-        saliency = saliency.reshape(96, 96)
-        # Visualize the image and the saliency map
+        
+        #red = larger absolut gradient in one of the 3 channels
+        # ... just shows certainty (not if for or against cancer)
+        sal_abs, _ = torch.max(image.grad.data.abs(), dim=1)
+        sal_abs = sal_abs.reshape(96, 96)
 
+
+
+        #red = one of the channels has super high gradient 
+        #vs black = one of the channels has super low gradient
+        # ... most certain channel wins
+        sal_max, _ = torch.max(image.grad.data, dim=1)
+        sal_min, _ = torch.min(image.grad.data, dim=1)
+
+        geq = sal_max.abs() >= sal_min.abs()
+        geq = geq.type(torch.int)
+        sal_max = sal_max * geq
+        sal_min = sal_min * geq.neg()
+        saliency = sal_max + sal_min
+        saliency = saliency.reshape(96, 96)
+
+        # Visualize the image and the saliency map
         img = next(iter(image)).reshape(-1, 96, 96)
         ax[0, i].imshow(img.cpu().detach().numpy().transpose(1, 2, 0))
         ax[0, i].axis('off')
-        ax[1, i].imshow(saliency.cpu(), cmap='afmhot')
+
+        ax[1, i].imshow(sal_abs.cpu(), cmap='hot')
         ax[1, i].axis('off')
+        ax[2, i].imshow(sal_abs.cpu(), cmap='RdGy')
+        ax[2, i].axis('off')
+
+        ax[3, i].imshow(saliency.cpu(), cmap='hot')
+        ax[3, i].axis('off')
+        ax[4, i].imshow(saliency.cpu(), cmap='RdGy')
+        ax[4, i].axis('off')
 
     plt.tight_layout(pad=0.7)
     fig.suptitle('Images of cancer and corresponding saliency maps')

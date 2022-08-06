@@ -32,6 +32,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
         wandb.log({"epoch": epoch})
         for batch, (X, y) in train_iter:
             # Compute prediction and loss
+            X.requires_grad_()
             X = X.to(device, non_blocking=True)
             y = y.to(device, non_blocking=True)
             y = y.view(-1, 1).to(torch.float)
