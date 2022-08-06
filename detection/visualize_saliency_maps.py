@@ -38,8 +38,8 @@ def show_saliencies(images):
         ax[1, i].imshow(saliency.cpu(), cmap='afmhot')
         ax[1, i].axis('off')
 
-    plt.tight_layout()
-    fig.suptitle('The Image and Its Saliency Map')
+    plt.tight_layout(pad=0.7)
+    fig.suptitle('Images of cancer and corresponding saliency maps')
     plt.show()
 
 
