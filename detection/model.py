@@ -275,7 +275,7 @@ class No_Conv(Model):
         )   
 
 if __name__ == "__main__":
-    model = Big_Konrad()
+    model = Big_Konrad(200, 0, 0.5)
     print(list(model.modules()))
     
     
