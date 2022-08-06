@@ -78,7 +78,7 @@ def load_model_from_artifact(run, model_class, alias):
     wandb.config.update(model_config)
 
     model = model_class(**model_config)
-    model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(torch.load(model_path, map_location=config.TRAINER_CONFIG["device"]))
     return model
 
 
