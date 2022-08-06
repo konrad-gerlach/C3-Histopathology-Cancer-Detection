@@ -1,17 +1,11 @@
 from __future__ import print_function, division
-import re
 import zipfile
 import torchvision
-import os
 import torch
-import numpy as np
 import matplotlib.pyplot as plt
+from torch.utils.data import Dataset
 from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
-from torchvision import transforms
-from torchvision.datasets import MNIST
-from torch.utils.data import Dataset, DataLoader
-from skimage import io, transform
+from skimage import io
 import os
 import pandas as pd
 import config
@@ -51,19 +45,21 @@ def load_cancer_ds():
     if not os.path.exists(path):
         load_competition_from_kaggle(competition, path)
 
-#decorates another Dataset and caches its results
+
+# decorates another Dataset and caches its results
 class CachingDataset(Dataset):
     def __init__(self, dataset):
         self.dataset = dataset
         self.cache = {}
-    
+
     def __len__(self):
         return self.dataset.__len__()
 
-    def __getitem__(self,idx):
+    def __getitem__(self, idx):
         if idx not in self.cache:
             self.cache[idx] = self.dataset.__getitem__(idx)
         return self.cache[idx]
+
 
 # https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
 class CancerDataset(Dataset):
@@ -104,12 +100,13 @@ def get_ds():
     train_ds, test_ds = split_ds(full_ds)
     return train_ds, test_ds
 
+
 def split_ds(full_ds):
     train_size = int(config.DATA_CONFIG["train_portion"] * len(full_ds))
     test_size = int(config.DATA_CONFIG["test_portion"] * len(full_ds))
     remainder = len(full_ds) - train_size
     train_ds, remainder_ds = torch.utils.data.random_split(full_ds, [train_size, remainder])
-    test_ds, remainder_ds = torch.utils.data.random_split(remainder_ds, [test_size, remainder-test_size])
+    test_ds, remainder_ds = torch.utils.data.random_split(remainder_ds, [test_size, remainder - test_size])
     return train_ds, test_ds
 
 
@@ -121,7 +118,7 @@ def get_dl(batch_size, num_workers, pin_memory=True):
     return train_dl, test_dl, img_shape
 
 
-def show(images, labels):    
+def show(images, labels):
     # Here _ means that we ignore (not use) variables
     _, figs = plt.subplots(1, len(images), figsize=(200, 200))
     for f, img, lbl in zip(figs, images, labels):
@@ -134,13 +131,12 @@ def show(images, labels):
         f.axes.get_xaxis().set_visible(False)
         f.axes.get_yaxis().set_visible(False)
 
+
 if __name__ == "__main__":
     train_dataloader, test_dataloader, img_shape = get_dl(batch_size=4, num_workers=4)
 
     for batch, (X, y) in enumerate(train_dataloader):
-        show(X,y)
+        show(X, y)
         if batch == 0:
             break
     plt.show()
-    
-
