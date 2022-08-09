@@ -1,6 +1,7 @@
 import wandb
 import trainer
 import config
+import helper
 
 
 def run_sweep():
@@ -50,14 +51,9 @@ def run_sweep():
 
 
 def run_classifier_with(sweep_config=None):
-    continue_training = config.TRAINER_CONFIG["continue_training"]
-    if continue_training:
-        job_type = "resume_training_classifier"
-    else:
-        job_type = "train_classifier"
 
     with wandb.init(project=config.WANDB_CONFIG["project"], entity=config.WANDB_CONFIG["entity"], config=sweep_config,
-                    job_type=job_type) as run:
+                    job_type=helper.job_type_of_training()) as run:
         sweep_config = wandb.config
         # change the configs globally so they can be unsed elsewhere
         config.TRAINER_CONFIG["max_epochs"] = config.SWEEP_CONFIG["epochs"]
@@ -74,7 +70,7 @@ def run_classifier_with(sweep_config=None):
         config.SP_MODEL_CONFIG["conv_dropout"] = sweep_config.conv_dropout
         config.SP_MODEL_CONFIG["fully_dropout"] = sweep_config.fully_dropout
 
-        trainer.run_classifier(run, continue_training)
+        trainer.train(run=run)
 
 
 if __name__ == "__main__":
