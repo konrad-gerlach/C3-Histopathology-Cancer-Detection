@@ -21,7 +21,7 @@ WANDB_CONFIG = dict(
 )
 
 TRAINER_CONFIG = dict(
-    max_epochs=100,
+    max_epochs=4,
     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
     continue_training=False,
     # if set to true the latest model for MODEL_CONFIG["model_class"] with alias LOAD_CONFIG["alias"] will be
@@ -59,7 +59,8 @@ DATA_CONFIG = dict(
     train_portion=0.66,
     test_portion=0.33,
     ds_path='datasets/cancer',
-    use_cache=True
+    use_cache=True,
+    grayscale=True
 )
 
 # default values
