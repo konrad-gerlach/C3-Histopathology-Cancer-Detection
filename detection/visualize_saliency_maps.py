@@ -1,10 +1,10 @@
-import re
 import matplotlib.pyplot as plt
 import torch
 import config
 import data
 import wandb
 import helper
+import numpy as np
 
 
 # Inspired by: https://towardsdatascience.com/saliency-map-using-pytorch-68270fe45e80
@@ -22,19 +22,21 @@ def setup():
     model.eval()
     # Open the image file
     data_loader, _, _ = data.get_dl(batch_size=1, num_workers=1)
-    wandb.finish()
+    #wandb.finish()
 
     return data_loader, device, model
 
 
 def show_saliencies(images):
     fig, ax = plt.subplots(5, len(images))
+    wandb_images = np.array([])
     for i, image in enumerate(images):
         
         #red = larger absolut gradient in one of the 3 channels
         # ... just shows certainty (not if for or against cancer)
         sal_abs, _ = torch.max(image.grad.data.abs(), dim=1)
         sal_abs = sal_abs.reshape(96, 96)
+        
 
 
 
@@ -43,13 +45,27 @@ def show_saliencies(images):
         # ... most certain channel wins
         sal_max, _ = torch.max(image.grad.data, dim=1)
         sal_min, _ = torch.min(image.grad.data, dim=1)
+        
 
         geq = sal_max.abs() >= sal_min.abs()
         geq = geq.type(torch.int)
         sal_max = sal_max * geq
         sal_min = sal_min * geq.neg()
+
+        
+        sal_max = sal_max.reshape(96, 96)
+        sal_min = sal_min.reshape(96, 96)        
+    
         saliency = sal_max + sal_min
         saliency = saliency.reshape(96, 96)
+
+        #wandb_images = np.append(wandb_images,[sal_abs])
+        """
+        wandb_images.append(sal_abs)
+        wandb_images.append(sal_max)
+        wandb_images.append(sal_min)
+        wandb_images.append(saliency)
+        """
 
         # Visualize the image and the saliency map
         img = next(iter(image)).reshape(-1, 96, 96)
@@ -65,6 +81,8 @@ def show_saliencies(images):
         ax[3, i].axis('off')
         ax[4, i].imshow(saliency.cpu(), cmap='RdGy')
         ax[4, i].axis('off')
+    
+    wandb.log({"Cancer images with saliency maps": plt})      
 
     plt.tight_layout(pad=0.7)
     fig.suptitle('Images of cancer and corresponding saliency maps')
