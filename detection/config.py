@@ -32,8 +32,15 @@ TRAINER_CONFIG = dict(
     # -pytorch approach no 1. was chosen)
 )
 
+if DATA_CONFIG["greyscale"]:
+    ALIAS="usable-black-and-white"
+else:
+    ALIAS="usable-color"
+
+
 LOAD_CONFIG = dict(
-    alias="usable"
+    alias=ALIAS
+    
 )
 
 # supports adam, adadelta, rmsprop, adagrad, sgd (with weight decay and momentum)
@@ -60,7 +67,7 @@ DATA_CONFIG = dict(
     test_portion=0.33,
     ds_path='datasets/cancer',
     use_cache=True,
-    grayscale=True
+    grayscale=False
 )
 
 # default values
