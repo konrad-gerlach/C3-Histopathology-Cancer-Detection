@@ -56,7 +56,7 @@ DATA_CONFIG = dict(
     test_portion=0.33,
     ds_path='datasets/cancer',
     use_cache=True,
-    grayscale=False
+    grayscale=True
 )
 
 if DATA_CONFIG["grayscale"]:
