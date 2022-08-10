@@ -60,7 +60,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
                 optimizer.step()
                 optimizer.zero_grad()
 
-            log_batch_progress(loss, batch, pred, acc_accum, size, X, y)
+            acc_accum = log_batch_progress(loss, batch, pred, acc_accum, size, X, y)
 
         train_epoch_loss /= batch + 1
         log_epoch_progress(train_epoch_loss, epoch)
@@ -87,6 +87,8 @@ def log_batch_progress(loss, batch, pred, acc_accum, size, X, y):
         wandb.log({"loss": loss})
         wandb.log({"train accuracy per batch": batch_acc})
         wandb.log({"train accuracy rolling avg per epoch": train_acc})
+
+    return acc_accum
 
 
 def log_epoch_progress(train_epoch_loss, epoch):
