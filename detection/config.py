@@ -56,13 +56,14 @@ DATA_CONFIG = dict(
     test_portion=0.33,
     ds_path='datasets/cancer',
     use_cache=True,
-    grayscale=True
+    grayscale=False
 )
 
 if DATA_CONFIG["grayscale"]:
     ALIAS="usable-black-and-white"
 else:
     ALIAS="usable-color"
+
 
 
 LOAD_CONFIG = dict(
