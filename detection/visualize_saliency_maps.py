@@ -30,24 +30,12 @@ def setup():
 
 def show_saliencies(images):
     fig, ax = plt.subplots(5, len(images))
-    wandb_images = np.array([])
     for i, image in enumerate(images):
         
         #red = larger absolut gradient in one of the 3 channels
         # ... just shows certainty (not if for or against cancer)
         sal_abs, _ = torch.max(image.grad.data.abs(), dim=1)
         sal_abs = sal_abs.reshape(96, 96)
-        threshold = 0.9
-        value_treshold = torch.quantile(sal_abs, q=threshold)
-        map = torch.zeros(96,96)
-
-        for i in range(0,95):
-            for k in range(0,95):
-                if sal_abs[i,k] >= value_treshold:
-                    map[i-1:i+1, k-1:k+1] = 1
-        
-        print(map)
-
 
         #red = one of the channels has super high gradient 
         #vs black = one of the channels has super low gradient
@@ -96,6 +84,37 @@ def show_saliencies(images):
     plt.tight_layout(pad=0.7)
     fig.suptitle('Images of cancer and corresponding saliency maps')
     plt.show()
+    cancer_regions(sal_abs, img)
+
+
+def cancer_regions(sal_abs, image):
+    #setup
+    threshold = 0.995
+    off = 3
+
+    value_treshold = torch.quantile(sal_abs, q=threshold)
+    cancer_areas = torch.zeros(96,96)
+    
+    for i in range(0,95):
+        for k in range(0,95):
+            if sal_abs[i,k] >= value_treshold:
+                cancer_areas[i-off:i+off, k-off:k+off] = 1
+
+    regions = torch.mul(image, cancer_areas)
+
+    fig, ax = plt.subplots(1, 3)
+    ax[0].imshow(image.cpu().detach().numpy().transpose(1, 2, 0))
+    ax[0].axis('off')
+    ax[1].imshow(sal_abs.cpu(), cmap='RdGy')
+    ax[1].axis('off')
+    ax[2].imshow(regions.cpu().detach().numpy().transpose(1, 2, 0))
+    ax[2].axis('off')
+
+    plt.tight_layout(pad=0.7)
+    fig.suptitle('Focus on regions that made the model predict cancer')
+    plt.show()
+
+
 
 
 def saliency_visualizer():
