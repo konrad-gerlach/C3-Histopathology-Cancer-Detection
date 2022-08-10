@@ -31,12 +31,15 @@ def unzip_competition_files(competition, path):
 
 
 def load_competition_from_kaggle(competition, path):
+    os.environ['KAGGLE_USERNAME'] = 'tillwenke'
+    os.environ['KAGGLE_KEY'] = '77fa31c0ce740e0419026a3524757c91'
+
     from kaggle.api.kaggle_api_extended import KaggleApi
     api = KaggleApi()
+    
     api.authenticate()
     api.competition_download_files(competition, path, quiet=False)
     unzip_competition_files(competition, path)
-
 
 def load_cancer_ds():
     competition = 'histopathologic-cancer-detection'

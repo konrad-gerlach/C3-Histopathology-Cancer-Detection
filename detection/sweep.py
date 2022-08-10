@@ -4,7 +4,7 @@ import config
 
 
 def run_sweep():
-    sweep_config = {'method': 'random'}
+    sweep_config = {'method': 'bayes'}
 
     metric = {
         'name': 'test accuracy per epoch',
@@ -13,32 +13,25 @@ def run_sweep():
     sweep_config['metric'] = metric
 
     parameters_dict = {
-        'optimizer': {
-            'values': ['adam']
-        },
-        'fc_layer_size': {
-            'values': [256]
-        },
-        'fully_dropout': {
-            'values': [0.4, 0.5, 0.6]
+            'fc_layer_size': {
+            'values': [128, 256]
         },
         'conv_dropout': {
-            'values': [0, 0.1, 0.2]
-        },
-        'batch_size': {
-            'values': [64]
+            'distribution': 'uniform',
+            'min': 0,
+            'max': 0.1
         },
         'lr': {
             # a flat distribution between 0 and 0.1
             'distribution': 'uniform',
-            'min': 0.005,
-            'max': 0.02
+            'min': 0.001,
+            'max': 0.01
         },
         'weight_decay': {
             # a flat distribution between 0 and 0.1
             'distribution': 'uniform',
-            'min': 0,
-            'max': 0.2
+            'min': 0.001,
+            'max': 0.01
         },
     }
     sweep_config['parameters'] = parameters_dict
@@ -62,9 +55,9 @@ def run_classifier_with(sweep_config=None):
         # change the configs globally so they can be unsed elsewhere
         config.TRAINER_CONFIG["max_epochs"] = config.SWEEP_CONFIG["epochs"]
         config.OPTIMIZER_CONFIG["lr"] = sweep_config.lr
-        config.OPTIMIZER_CONFIG["batch_size"] = sweep_config.batch_size
+        #config.OPTIMIZER_CONFIG["batch_size"] = sweep_config.batch_size
 
-        config.OPTIMIZER_CONFIG["use_optimizer"] = sweep_config.optimizer
+        #config.OPTIMIZER_CONFIG["use_optimizer"] = sweep_config.optimizer
         config.OPTIMIZER_CONFIG["weight_decay"] = sweep_config.weight_decay
 
         config.DATA_CONFIG["train_portion"] = config.SWEEP_CONFIG["train_portion"]
@@ -72,7 +65,7 @@ def run_classifier_with(sweep_config=None):
 
         config.SP_MODEL_CONFIG["fc_layer_size"] = sweep_config.fc_layer_size
         config.SP_MODEL_CONFIG["conv_dropout"] = sweep_config.conv_dropout
-        config.SP_MODEL_CONFIG["fully_dropout"] = sweep_config.fully_dropout
+        #config.SP_MODEL_CONFIG["fully_dropout"] = sweep_config.fully_dropout
 
         trainer.run_classifier(run, continue_training)
 
