@@ -33,7 +33,9 @@ def choose_optimizer(optimizer_config, parameters, gradient_accumulation, learni
                                weight_decay=optimizer_config["weight_decay"])
 
     else:
-        return torch.optim.SGD(parameters, lr=learning_rate)
+        return torch.optim.Adam(parameters, lr=learning_rate, betas=optimizer_config["betas"],
+                                eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"],
+                                amsgrad=optimizer_config["amsgrad"])
 
 
 def log_metadata(trainer_config, optimizer_config, optimizer):
