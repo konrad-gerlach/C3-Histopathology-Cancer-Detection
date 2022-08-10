@@ -1,3 +1,4 @@
+from asyncio import threads
 import matplotlib.pyplot as plt
 import torch
 import config
@@ -36,8 +37,16 @@ def show_saliencies(images):
         # ... just shows certainty (not if for or against cancer)
         sal_abs, _ = torch.max(image.grad.data.abs(), dim=1)
         sal_abs = sal_abs.reshape(96, 96)
-        
+        threshold = 0.9
+        value_treshold = torch.quantile(sal_abs, q=threshold)
+        map = torch.zeros(96,96)
 
+        for i in range(0,95):
+            for k in range(0,95):
+                if sal_abs[i,k] >= value_treshold:
+                    map[i-1:i+1, k-1:k+1] = 1
+        
+        print(map)
 
 
         #red = one of the channels has super high gradient 
