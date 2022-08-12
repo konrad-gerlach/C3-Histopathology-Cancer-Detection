@@ -62,7 +62,7 @@ DATA_CONFIG = dict(
 if DATA_CONFIG["grayscale"]:
     ALIAS="usable-black-and-white"
 else:
-    ALIAS="usable-color"
+    ALIAS="usable-colored"
 
 
 
