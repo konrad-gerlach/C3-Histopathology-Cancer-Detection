@@ -30,6 +30,7 @@ TRAINER_CONFIG = dict(
     gradient_accumulation=1,
     # https://stackoverflow.com/questions/63815311/what-is-the-correct-way-to-implement-gradient-accumulation-in
     # -pytorch approach no 1. was chosen)
+    mode = "feature_visualization" #supports training,sweeps,feature_visualization
 )
 
 # supports adam, adadelta, rmsprop, adagrad, sgd (with weight decay and momentum)
@@ -67,7 +68,8 @@ else:
 
 
 LOAD_CONFIG = dict(
-    alias=ALIAS    
+    alias=ALIAS,
+    name="Big_Konrad"  
 )
 
 # default values

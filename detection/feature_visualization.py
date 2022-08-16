@@ -22,7 +22,7 @@ def run_visualizer(run):
     model = helper.load_model(run)
 
     input = sample((1,3,96,96),config.TRAINER_CONFIG["device"])
-    optimizer = helper.choose_optimizer(optimizer_config,[input], config.TRAINER_CONFIG["gradient_accumulation"], learning_rate=config.OPTIMIZER_CONFIG["lr"])
+    optimizer = helper.choose_optimizer(config.OPTIMIZER_CONFIG,[input], config.TRAINER_CONFIG["gradient_accumulation"], learning_rate=config.OPTIMIZER_CONFIG["lr"])
     logging_config = helper.log_metadata()
  
     wandb.config.update(logging_config)

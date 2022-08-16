@@ -3,6 +3,7 @@ import config
 import trainer
 import sweep
 import feature_visualization
+import helper
 
 if __name__ == "__main__":
     helper.define_dataset_location()
