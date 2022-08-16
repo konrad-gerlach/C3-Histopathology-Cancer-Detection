@@ -1,34 +1,29 @@
-from asyncio import threads
 import matplotlib.pyplot as plt
 import torch
 import config
 import data
 import wandb
 import helper
-import numpy as np
 
 
 # Inspired by: https://towardsdatascience.com/saliency-map-using-pytorch-68270fe45e80
 def setup(grayscale, good_model):
-
-    #order important :/
+    # order important :/
     if good_model:
         if grayscale:
-            config.DATA_CONFIG["grayscale"]=True
+            config.DATA_CONFIG["grayscale"] = True
         else:
-            config.LOAD_CONFIG["alias"]="usable_colored"
+            config.LOAD_CONFIG["alias"] = "usable-colored"
     else:
         if grayscale:
-            config.DATA_CONFIG["grayscale"]=True
+            config.DATA_CONFIG["grayscale"] = True
         else:
-            config.LOAD_CONFIG["alias"]="bad_colored"
-
+            config.LOAD_CONFIG["alias"] = "bad_colored"
 
     if grayscale:
-        config.DATA_CONFIG["grayscale"]=True
+        config.DATA_CONFIG["grayscale"] = True
     else:
-        config.DATA_CONFIG["grayscale"]=False
-
+        config.DATA_CONFIG["grayscale"] = False
 
     wandb_config = config.WANDB_CONFIG
     job_type = "saliency"
@@ -41,7 +36,6 @@ def setup(grayscale, good_model):
     # Set the model on Eval Mode
     model.eval()
     data_loader, _, _ = data.get_dl(batch_size=1, num_workers=1)
-   
 
     return data_loader, device, model
 
@@ -49,28 +43,25 @@ def setup(grayscale, good_model):
 def show_saliencies(images):
     fig, ax = plt.subplots(5, len(images))
     for i, image in enumerate(images):
-        
-        #red = larger absolut gradient in one of the 3 channels
+        # red = larger absolut gradient in one of the 3 channels
         # ... just shows certainty (not if for or against cancer?)
         sal_abs, _ = torch.max(image.grad.data.abs(), dim=1)
         sal_abs = sal_abs.reshape(96, 96)
 
-        #red = one of the channels has super high gradient 
-        #vs black = one of the channels has super low gradient
+        # red = one of the channels has super high gradient
+        # vs black = one of the channels has super low gradient
         # ... most certain channel wins
         sal_max, _ = torch.max(image.grad.data, dim=1)
         sal_min, _ = torch.min(image.grad.data, dim=1)
-        
 
         geq = sal_max.abs() >= sal_min.abs()
         geq = geq.type(torch.int)
         sal_max = sal_max * geq
         sal_min = sal_min * geq.neg()
 
-        
         sal_max = sal_max.reshape(96, 96)
-        sal_min = sal_min.reshape(96, 96)        
-    
+        sal_min = sal_min.reshape(96, 96)
+
         saliency = sal_max + sal_min
         saliency = saliency.reshape(96, 96)
 
@@ -81,15 +72,15 @@ def show_saliencies(images):
 
         ax[1, i].imshow(sal_abs.cpu(), cmap='hot')
         ax[1, i].axis('off')
-        ax[2, i].imshow(sal_abs.cpu(), cmap='RdGy')
+        ax[2, i].imshow(sal_abs.cpu(), cmap='inferno')
         ax[2, i].axis('off')
 
         ax[3, i].imshow(saliency.cpu(), cmap='hot')
         ax[3, i].axis('off')
-        ax[4, i].imshow(saliency.cpu(), cmap='RdGy')
+        ax[4, i].imshow(saliency.cpu(), cmap='inferno')
         ax[4, i].axis('off')
-    
-    wandb.log({"Cancer images with saliency maps": plt})      
+
+    wandb.log({"Cancer images with saliency maps": plt})
 
     plt.tight_layout(pad=0.7)
     fig.suptitle('Images of cancer and corresponding saliency maps')
@@ -98,17 +89,17 @@ def show_saliencies(images):
 
 
 def cancer_regions(sal_abs, image):
-    #setup
+    # setup
     threshold = 0.995
     off = 3
 
     value_treshold = torch.quantile(sal_abs, q=threshold)
-    cancer_areas = torch.zeros(96,96)
-    
-    for i in range(0,95):
-        for k in range(0,95):
-            if sal_abs[i,k] >= value_treshold:
-                cancer_areas[i-off:i+off, k-off:k+off] = 1
+    cancer_areas = torch.zeros(96, 96)
+
+    for i in range(0, 95):
+        for k in range(0, 95):
+            if sal_abs[i, k] >= value_treshold:
+                cancer_areas[i - off:i + off, k - off:k + off] = 1
 
     regions = torch.mul(image, cancer_areas)
 
@@ -125,8 +116,6 @@ def cancer_regions(sal_abs, image):
     plt.show()
 
 
-
-
 def collect_images_with_gradient(grayscale, good_model, num_images, images):
     image_data, device, model = setup(grayscale, good_model)
     num_images = len(images) + num_images
@@ -137,7 +126,7 @@ def collect_images_with_gradient(grayscale, good_model, num_images, images):
             X.requires_grad_()
             images.append(X)
         if len(images) >= num_images:
-            break    
+            break
 
     for image in images:
         # Retrieve output from the image
@@ -147,22 +136,20 @@ def collect_images_with_gradient(grayscale, good_model, num_images, images):
         output_max = output[0, output_idx]
         # Do backpropagation to get the derivative of the output based on the image
         output_max.backward()
-    
+
     return images
 
+
 def saliency_visualizer():
-    #configure here
+    # configure here
 
     num_images = 3
     images = []
-    images = collect_images_with_gradient(False ,True ,num_images, images)
-    images = collect_images_with_gradient(False ,False ,num_images, images)
-    images = collect_images_with_gradient(True ,True ,num_images, images)
+    images = collect_images_with_gradient(False, True, num_images, images)
+    images = collect_images_with_gradient(False, False, num_images, images)
+    images = collect_images_with_gradient(True, True, num_images, images)
 
     show_saliencies(images)
-
-
-
 
 
 if __name__ == "__main__":
