@@ -5,6 +5,7 @@ datasets/
 *$py.class
 
 wandb/
+.vscode/
 
 # C extensions
 *.so

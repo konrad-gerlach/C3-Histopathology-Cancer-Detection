@@ -2,11 +2,12 @@ import torch
 import helper
 import wandb
 
+
 def test_loop(model, test_dataloader, loss_fn, device, epoch):
     # test loss and accuracy
     # https://colab.research.google.com/drive/1LHDUxiuG1niSOTiK9vRBlX47403OI15H?authuser=1#scrollTo=yoek_AxoQiNg
     model.eval()
-    correct_pred = 0 
+    correct_pred = 0
     n = 0
 
     #TODO Refactor to use generic training loop instead
@@ -32,5 +33,5 @@ def test_loop(model, test_dataloader, loss_fn, device, epoch):
 
     wandb.log({"test loss per epoch": test_loss_epoch})
     wandb.log({"test accuracy per epoch": epoch_acc})
-    print('epoch {}, test loss {}, accuracy {}'.format(epoch+1, test_loss_epoch, epoch_acc))
+    print('epoch {}, test loss {}, accuracy {}'.format(epoch + 1, test_loss_epoch, epoch_acc))
     return test_loss_epoch, epoch_acc
