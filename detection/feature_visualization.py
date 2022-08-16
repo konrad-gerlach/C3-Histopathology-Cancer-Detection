@@ -1,6 +1,6 @@
 from tkinter.tix import X_REGION
 import torch
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 import torchvision
 import wandb
 import config
@@ -13,21 +13,17 @@ def sample(img_shape,device):
 
 
 def visualizer():
-    trainer_config = config.TRAINER_CONFIG
     job_type = "visualization"
     wandb.config = {}
-    run = wandb.init(project=trainer_config["project"], entity=trainer_config["entity"], job_type=job_type)
+    run = wandb.init(project=config.WANDB_CONFIG["project"], entity=config.WANDB_CONFIG["entity"], job_type=job_type)
     run_visualizer(run)
 
 def run_visualizer(run):
-    trainer_config = config.TRAINER_CONFIG
-    model_config = config.MODEL_CONFIG
-    optimizer_config = config.OPTIMIZER_CONFIG
     model = helper.load_model(run)
 
-    input = sample((1,3,96,96),trainer_config["device"])
-    optimizer = helper.choose_optimizer(optimizer_config,[input], model_config["gradient_accumulation"], learning_rate=model_config["lr"])
-    logging_config = helper.log_metadata(model_config, optimizer)
+    input = sample((1,3,96,96),config.TRAINER_CONFIG["device"])
+    optimizer = helper.choose_optimizer(optimizer_config,[input], config.TRAINER_CONFIG["gradient_accumulation"], learning_rate=config.OPTIMIZER_CONFIG["lr"])
+    logging_config = helper.log_metadata()
  
     wandb.config.update(logging_config)
    
@@ -35,9 +31,8 @@ def run_visualizer(run):
 
 
     print("You are currently using the optimizer: {}".format(optimizer))
-    print(trainer_config["device"])
 
-    visualize(model, optimizer,input, trainer_config["device"], model_config["gradient_accumulation"], epochs=model_config["max_epochs"])
+    visualize(model, optimizer,input, config.TRAINER_CONFIG["device"], config.TRAINER_CONFIG["gradient_accumulation"], epochs=config.TRAINER_CONFIG["max_epochs"])
     
     wandb.finish()
 

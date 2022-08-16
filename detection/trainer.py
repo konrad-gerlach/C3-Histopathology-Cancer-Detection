@@ -52,7 +52,6 @@ def training_logger(outputs,loss,batch,X,y,inputs):
 def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, device, epochs, gradient_accumulation=1):
     model = model.to(device)
     for epoch in range(epochs):
-        train_iter = enumerate(train_dataloader)
         inputs = dict(
             acc_accum = 0,
             train_epoch_loss = 0,
@@ -62,7 +61,7 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
         model.train()
         wandb.log({"epoch": epoch})
         
-        for batch, (X, y) in train_iter:
+        for batch, (X, y) in enumerate(train_dataloader):
             inputs = generic_train_loop.train_loop(batch,X,y,device,model,loss_fn,gradient_accumulation,optimizer,training_logger,inputs)
         
         # loss while training
@@ -99,16 +98,12 @@ def run_classifier(run, continue_training):
     else:
         model = get_model()
 
-    optimizer = helper.choose_optimizer(optimizer_config, model.parameters(), model_config["gradient_accumulation"], learning_rate=model_config["lr"])
-    logging_config = helper.log_metadata(model_config, optimizer)
+    optimizer = helper.choose_optimizer(optimizer_config, model.parameters(), config.TRAINER_CONFIG["gradient_accumulation"], learning_rate=config.OPTIMIZER_CONFIG["lr"])
+    logging_config = helper.log_metadata()
  
     #wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=logging_config)
     wandb.config.update(logging_config)
    
-    wandb.watch(model, criterion=None, log="gradients", log_freq=1000, idx=None, log_graph=(True))
-
-    wandb.config.update(logging_config)
-
     wandb.watch(model, criterion=None, log="gradients", log_freq=1000, idx=None, log_graph=(True))
 
     print("You are currently using the optimizer: {}".format(optimizer))
@@ -120,22 +115,6 @@ def run_classifier(run, continue_training):
 
     wandb.finish()
 
-
-# decreases logging for better performance! mostly relevant for small dsets
-PERFORMANCE_MODE = False
-
-GPUS = 1
-
 if __name__ == "__main__":
     helper.define_dataset_location()
-    parser = argparse.ArgumentParser(description='configure project')
-    parser.add_argument('--ds_path', default=config.DATA_CONFIG["ds_path"],
-                        help='the location where the dataset is or should be located')
-
-    args = parser.parse_args()
-    config.DATA_CONFIG["ds_path"] = args.ds_path
-    print(config.DATA_CONFIG["ds_path"])
-    #feature_visualization.visualizer()
-    helper.define_dataset_location()
-    classifier()
     classifier()

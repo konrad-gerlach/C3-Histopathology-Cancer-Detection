@@ -38,12 +38,12 @@ def choose_optimizer(optimizer_config, parameters, gradient_accumulation, learni
                                 amsgrad=optimizer_config["amsgrad"])
 
 
-def log_metadata(trainer_config, optimizer_config, optimizer):
-    lines = str(optimizer).split("\n")
+def log_metadata():
+    lines = str(config.OPTIMIZER_CONFIG).split("\n")
     logging_config = dict(
-        batch_size=optimizer_config["batch_size"],
-        learning_rate=optimizer_config["lr"],
-        max_epochs=trainer_config["max_epochs"],
+        batch_size=config.OPTIMIZER_CONFIG["batch_size"],
+        learning_rate=config.OPTIMIZER_CONFIG["lr"],
+        max_epochs=config.TRAINER_CONFIG["max_epochs"],
         train_portion=config.DATA_CONFIG["train_portion"],
         test_portion=config.DATA_CONFIG["test_portion"],
         optimizer=lines[0].split(" ")[0],
