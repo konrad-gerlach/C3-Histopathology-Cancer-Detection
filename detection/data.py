@@ -45,7 +45,7 @@ def load_cancer_ds():
     competition = 'histopathologic-cancer-detection'
     path = config.DATA_CONFIG["ds_path"]
 
-    if not os.path.exists(path):
+    if not os.path.exists(os.path.abspath(path)):
         load_competition_from_kaggle(competition, path)
 
 
