@@ -30,7 +30,7 @@ TRAINER_CONFIG = dict(
     gradient_accumulation=1,
     # https://stackoverflow.com/questions/63815311/what-is-the-correct-way-to-implement-gradient-accumulation-in
     # -pytorch approach no 1. was chosen)
-    mode = "training" #supports training,sweeps,feature_visualization
+    mode = "feature_visualization" #supports training,sweeps,feature_visualization
 )
 
 # supports adam, adadelta, rmsprop, adagrad, sgd (with weight decay and momentum)
@@ -40,7 +40,7 @@ TRAINER_CONFIG = dict(
 OPTIMIZER_CONFIG = dict(
     batch_size=64,
     use_optimizer="adam",
-    lr=0.0001,
+    lr=0.01,
     weight_decay=0.001,
     alpha=0.99,  # For RmsProp
     betas=(0.9, 0.999),  # For Adam
