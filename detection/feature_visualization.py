@@ -30,8 +30,8 @@ def pad_image_channels(image):
 
 def random_transform(inputs):
     transformed = torchvision.transforms.GaussianBlur(5)(inputs)
-    transformed = torchvision.transforms.RandomAffine(2,translate=(0.1,0.1),scale=(0.8,1.2))(inputs)
-    return transformed
+    transformed = torchvision.transforms.RandomAffine(2,translate=(0.1,0.1),scale=(0.8,1.2))(transformed)
+    return inputs
 
 #loss function for a batch of multiple images to be optimized to minimize loss functions for multiple neurons
 def visualizer_loss_fn(outputs,y):
@@ -39,7 +39,7 @@ def visualizer_loss_fn(outputs,y):
     loss = torch.zeros(1,device=layer.device)
     for i in range(len(layer)):
         loss += layer[i,i]
-    return loss
+    return -loss
 
 #loss function for a batch of multiple dataset images minimizing the same loss function
 def data_example_loss_fn(outputs,y):
@@ -52,8 +52,8 @@ def data_example_loss_fn(outputs,y):
 def visualize(model, optimizer, device, gradient_accumulation,sample_input,epochs=5):
     loss_fn = visualizer_loss_fn
     visualizer_loop(model, loss_fn, optimizer, device, epochs, gradient_accumulation,sample_input)
-    loss_fn = data_example_loss_fn
-    get_data_examples(model,device,loss_fn)
+    #loss_fn = data_example_loss_fn
+    #get_data_examples(model,device,loss_fn)
 
 def logger(outputs,loss,batch,X,y,inputs):
     X = torch.clamp(X,0,1)

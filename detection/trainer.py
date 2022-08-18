@@ -99,7 +99,7 @@ def run_classifier(run, continue_training):
         model = get_model()
 
     optimizer = helper.choose_optimizer(optimizer_config, model.parameters(), config.TRAINER_CONFIG["gradient_accumulation"], learning_rate=config.OPTIMIZER_CONFIG["lr"])
-    logging_config = helper.log_metadata()
+    logging_config = helper.log_metadata(optimizer)
  
     #wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=logging_config)
     wandb.config.update(logging_config)

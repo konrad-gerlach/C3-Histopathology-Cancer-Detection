@@ -38,8 +38,8 @@ def choose_optimizer(optimizer_config, parameters, gradient_accumulation, learni
                                 amsgrad=optimizer_config["amsgrad"])
 
 
-def log_metadata():
-    lines = str(config.OPTIMIZER_CONFIG).split("\n")
+def log_metadata(optimizer):
+    lines = str(optimizer).split("\n")
     logging_config = dict(
         batch_size=config.OPTIMIZER_CONFIG["batch_size"],
         learning_rate=config.OPTIMIZER_CONFIG["lr"],
@@ -47,7 +47,15 @@ def log_metadata():
         train_portion=config.DATA_CONFIG["train_portion"],
         test_portion=config.DATA_CONFIG["test_portion"],
         optimizer=lines[0].split(" ")[0],
-        optimizer_parameters=lines[1:-1]
+        optimizer_parameters=lines[1:-1],
+        model_config = config.MODEL_CONFIG,
+        sp_model_config = config.SP_MODEL_CONFIG,
+        wandb_config = config.WANDB_CONFIG,
+        trainer_config = config.TRAINER_CONFIG,
+        optimizer_config = config.OPTIMIZER_CONFIG,
+        data_config = config.DATA_CONFIG,
+        load_config = config.LOAD_CONFIG,
+        sweep_config = config.SWEEP_CONFIG
     )
     return logging_config
 
