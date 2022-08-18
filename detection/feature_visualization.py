@@ -29,8 +29,8 @@ def pad_image_channels(image):
         return image
 
 def random_transform(inputs):
-    transformed = torchvision.transforms.GaussianBlur(5)(inputs)
-    transformed = torchvision.transforms.RandomAffine(2,translate=(0.1,0.1),scale=(0.8,1.2))(transformed)
+    transformed = torchvision.transforms.GaussianBlur(5,sigma = 0.75)(inputs)
+    transformed = torchvision.transforms.RandomAffine(15,translate=(0.1,0.1),scale=(0.8,1.2))(transformed)
     return inputs
 
 #loss function for a batch of multiple images to be optimized to minimize loss functions for multiple neurons
@@ -102,7 +102,7 @@ def run_visualizer(run):
     _, _, img_shape = data.get_dl(config.OPTIMIZER_CONFIG["batch_size"],config.MODEL_CONFIG["num_workers"])
     sample_input = generate_initial_sample(img_shape)
     optimizer = helper.choose_optimizer(config.OPTIMIZER_CONFIG,[sample_input], config.TRAINER_CONFIG["gradient_accumulation"], learning_rate=config.OPTIMIZER_CONFIG["lr"])
-    logging_config = helper.log_metadata()
+    logging_config = helper.log_metadata(optimizer)
 
     wandb.config.update(logging_config)
     wandb.watch(model, criterion=None, log="gradients", log_freq=1000, idx=None, log_graph=(True))
