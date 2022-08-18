@@ -15,7 +15,7 @@ def sample(img_shape,device):
 def generate_initial_sample(img_shape):
     width = img_shape[1]
     height = img_shape[2]
-    if config.DATA_CONFIG["grayscale"]:
+    if True or config.DATA_CONFIG["grayscale"]:
         return sample((1,1,width,height),config.TRAINER_CONFIG["device"])
     else:
         return sample((1,3,width,height),config.TRAINER_CONFIG["device"])
@@ -23,7 +23,7 @@ def generate_initial_sample(img_shape):
 
 #conversion from single channel grayscale to three channel grayscale
 def pad_image_channels(image):
-    if config.DATA_CONFIG["grayscale"]:
+    if True or config.DATA_CONFIG["grayscale"]:
         return image.repeat(1,3,1,1)
     else:
         return image
@@ -31,7 +31,7 @@ def pad_image_channels(image):
 def random_transform(inputs):
     transformed = torchvision.transforms.GaussianBlur(5,sigma = 0.75)(inputs)
     transformed = torchvision.transforms.RandomAffine(15,translate=(0.1,0.1),scale=(0.8,1.2))(transformed)
-    return inputs
+    return transformed
 
 #loss function for a batch of multiple images to be optimized to minimize loss functions for multiple neurons
 def visualizer_loss_fn(outputs,y):
@@ -39,7 +39,7 @@ def visualizer_loss_fn(outputs,y):
     loss = torch.zeros(1,device=layer.device)
     for i in range(len(layer)):
         loss += layer[i,i]
-    return -loss
+    return loss
 
 #loss function for a batch of multiple dataset images minimizing the same loss function
 def data_example_loss_fn(outputs,y):
