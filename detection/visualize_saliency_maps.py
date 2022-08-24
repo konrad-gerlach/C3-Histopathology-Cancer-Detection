@@ -35,7 +35,7 @@ def setup(grayscale, good_model):
 
     # Set the model on Eval Mode
     model.eval()
-    data_loader, _, _ = data.get_dl(batch_size=1, num_workers=1)
+    _, data_loader, _ = data.get_dl(batch_size=1, num_workers=1)
 
     return data_loader, device, model
 
