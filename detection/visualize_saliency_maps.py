@@ -73,6 +73,13 @@ def show_saliencies(images):
         ax[4, i].imshow(sal_abs.cpu(), cmap='inferno')
         ax[4, i].axis('off')
 
+        inferno = plt.get_cmap('inferno')
+        wandb.log({"input" : wandb.Image(img.cpu().detach().numpy().transpose(1, 2, 0))})
+        wandb.log({"red" : wandb.Image(inferno(red_grads))})
+        wandb.log({"green" : wandb.Image(inferno(green_grads))})
+        wandb.log({"blue" : wandb.Image(inferno(blue_grads))})
+        wandb.log({"full" : wandb.Image(inferno(sal_abs))})
+
 
     wandb.log({"Cancer images with saliency maps": plt})
 
