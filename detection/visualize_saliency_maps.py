@@ -35,7 +35,7 @@ def setup(grayscale, good_model):
 
     # Set the model on Eval Mode
     model.eval()
-    _, data_loader, _ = data.get_dl(batch_size=1, num_workers=1)
+    data_loader, _, _ = data.get_dl(batch_size=1, num_workers=1)
 
     return data_loader, device, model
 
@@ -43,42 +43,36 @@ def setup(grayscale, good_model):
 def show_saliencies(images):
     fig, ax = plt.subplots(5, len(images))
     for i, image in enumerate(images):
+        image_grads = image.grad.data.abs()
+        
+        red_grads = image_grads[0:1,0]
+        green_grads = image_grads[0:1,1]
+        blue_grads = image_grads[0:1,2]
+        
+        red_grads = red_grads.reshape(96, 96)
+        green_grads = green_grads.reshape(96, 96)
+        blue_grads = blue_grads.reshape(96, 96)
+
         # red = larger absolut gradient in one of the 3 channels
         # ... just shows certainty (not if for or against cancer?)
-        sal_abs, _ = torch.max(image.grad.data.abs(), dim=1)
+        sal_abs, _ = torch.max(image_grads, dim=1)
+       
         sal_abs = sal_abs.reshape(96, 96)
-
-        # red = one of the channels has super high gradient
-        # vs black = one of the channels has super low gradient
-        # ... most certain channel wins
-        sal_max, _ = torch.max(image.grad.data, dim=1)
-        sal_min, _ = torch.min(image.grad.data, dim=1)
-
-        geq = sal_max.abs() >= sal_min.abs()
-        geq = geq.type(torch.int)
-        sal_max = sal_max * geq
-        sal_min = sal_min * geq.neg()
-
-        sal_max = sal_max.reshape(96, 96)
-        sal_min = sal_min.reshape(96, 96)
-
-        saliency = sal_max + sal_min
-        saliency = saliency.reshape(96, 96)
 
         # Visualize the image and the saliency map
         img = next(iter(image)).reshape(-1, 96, 96)
         ax[0, i].imshow(img.cpu().detach().numpy().transpose(1, 2, 0))
         ax[0, i].axis('off')
 
-        ax[1, i].imshow(sal_abs.cpu(), cmap='hot')
+        ax[1, i].imshow(red_grads.cpu(), cmap='inferno')
         ax[1, i].axis('off')
-        ax[2, i].imshow(sal_abs.cpu(), cmap='inferno')
+        ax[2, i].imshow(green_grads.cpu(), cmap='inferno')
         ax[2, i].axis('off')
-
-        ax[3, i].imshow(saliency.cpu(), cmap='hot')
+        ax[3, i].imshow(blue_grads.cpu(), cmap='inferno')
         ax[3, i].axis('off')
-        ax[4, i].imshow(saliency.cpu(), cmap='inferno')
+        ax[4, i].imshow(sal_abs.cpu(), cmap='inferno')
         ax[4, i].axis('off')
+
 
     wandb.log({"Cancer images with saliency maps": plt})
 
@@ -120,11 +114,16 @@ def collect_images_with_gradient(grayscale, good_model, num_images, images):
     image_data, device, model = setup(grayscale, good_model)
     num_images = len(images) + num_images
 
+    highly_cancerous = 0.99
+    highly_non_cancerous = 0.01
+
     for batch, (X, y) in enumerate(image_data):
         if y:
             X = X.to(device)
             X.requires_grad_()
-            images.append(X)
+            output = model(X)
+            if output > highly_cancerous:
+                images.append(X)
         if len(images) >= num_images:
             break
 
@@ -143,11 +142,11 @@ def collect_images_with_gradient(grayscale, good_model, num_images, images):
 def saliency_visualizer():
     # configure here
 
-    num_images = 3
+    num_images = 7
     images = []
     images = collect_images_with_gradient(False, True, num_images, images)
-    images = collect_images_with_gradient(False, False, num_images, images)
-    images = collect_images_with_gradient(True, True, num_images, images)
+    #images = collect_images_with_gradient(False, False, num_images, images)
+    #images = collect_images_with_gradient(True, True, num_images, images)
 
     show_saliencies(images)
 
