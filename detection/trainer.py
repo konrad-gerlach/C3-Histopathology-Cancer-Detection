@@ -11,17 +11,22 @@ import helper
 import generic_train_loop
 
 # https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
+
+
 def get_model():
     # first parameters?
     # insert values from SP_MODEL_CONFIG here if necessary
     return config.MODEL_CONFIG["model_class"](**config.SP_MODEL_CONFIG)
 
+
 def train(model, train_dataloader, test_dataloader, optimizer, device, gradient_accumulation,epochs=5):
     loss_fn = training_loss_function
     train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, device, epochs, gradient_accumulation)
 
+
 def training_loss_function(outputs,y):
     return nn.BCEWithLogitsLoss()(outputs[-1],y)
+
 
 def training_logger(outputs,loss,batch,X,y,inputs):
     inputs["train_epoch_loss"] += float(loss)
@@ -37,7 +42,7 @@ def training_logger(outputs,loss,batch,X,y,inputs):
 
     # loss and accuracy for some batches
     if batch % 100 == 0:
-        loss  = loss.item()
+        loss = loss.item()
         current = batch * len(X)
         batch_acc = batch_acc_accum / len(X)
         train_acc = inputs["acc_accum"] / (current + len(X))
