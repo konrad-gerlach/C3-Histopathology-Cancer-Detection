@@ -1,9 +1,12 @@
+from typing import SupportsRound
 import matplotlib.pyplot as plt
 import torch
 import config
 import data
 import wandb
 import helper
+from PIL import Image
+import torchvision.transforms as transforms
 
 
 # Inspired by: https://towardsdatascience.com/saliency-map-using-pytorch-68270fe45e80
@@ -75,10 +78,63 @@ def show_saliencies(images):
 
         inferno = plt.get_cmap('inferno')
         wandb.log({"input" : wandb.Image(img.cpu().detach().numpy().transpose(1, 2, 0))})
+        """
         wandb.log({"red" : wandb.Image(inferno(red_grads))})
         wandb.log({"green" : wandb.Image(inferno(green_grads))})
         wandb.log({"blue" : wandb.Image(inferno(blue_grads))})
+        """
+        #sal_abs = inferno(sal_abs)
+        
+        """
+        #mark inner 32x32
+        for i in range(0, 95):
+            for k in range(0, 95):
+                if (i == 31 and k >= 31 and  k <= 64) or (i == 64 and k >= 31 and k <= 64) or (k == 31 and i >= 31 and i <= 64) or (k == 64 and i >= 31 and i <= 64):
+                    sal_abs[i,k] = [0, 1, 0, 1]
+       """
+
         wandb.log({"full" : wandb.Image(inferno(sal_abs))})
+
+        # setup
+        threshold = 0.99
+        off = 5
+
+        value_treshold = torch.quantile(sal_abs, q=threshold)
+        cancer_areas = torch.zeros(96, 96)
+
+        for i in range(0, 95):
+            for k in range(0, 95):
+                if sal_abs[i, k] >= value_treshold:
+                    cancer_areas[i - off:i + off, k - off:k + off] = 1
+
+        
+
+        regions = torch.mul(image, cancer_areas)
+
+        
+
+        
+        cancer_surrounding = torch.ones(3, 96, 96)
+        cancer_add = torch.zeros(3, 96, 96)
+
+        for i in range(0, 95):
+            for k in range(0, 95):
+                if cancer_areas[i,k] == 0:
+                    if (cancer_areas[i-1,k] == 1 or cancer_areas[i+1,k] == 1 or cancer_areas[i,k-1] == 1 or cancer_areas[i,k+1] == 1):
+                        if (cancer_areas[i-1,k] == 0 or cancer_areas[i+1,k] == 0 or cancer_areas[i,k-1] == 0 or cancer_areas[i,k+1] == 0):
+                            cancer_surrounding[0,i,k]=0
+                            cancer_surrounding[1,i,k]=0
+                            cancer_surrounding[2,i,k]=0
+                            cancer_add[0,i,k]=1
+                       
+
+        
+        surrounding = torch.mul(image, cancer_surrounding)
+        surrounding = torch.add(surrounding, cancer_add)
+
+        wandb.log({"cancer cells" : wandb.Image(surrounding)})
+
+    
 
 
     wandb.log({"Cancer images with saliency maps": plt})
@@ -86,13 +142,13 @@ def show_saliencies(images):
     plt.tight_layout(pad=0.7)
     fig.suptitle('Images of cancer and corresponding saliency maps')
     plt.show()
-    cancer_regions(sal_abs, img)
+    #cancer_regions(sal_abs, img)
 
 
 def cancer_regions(sal_abs, image):
     # setup
     threshold = 0.995
-    off = 3
+    off = 5
 
     value_treshold = torch.quantile(sal_abs, q=threshold)
     cancer_areas = torch.zeros(96, 96)
@@ -101,6 +157,8 @@ def cancer_regions(sal_abs, image):
         for k in range(0, 95):
             if sal_abs[i, k] >= value_treshold:
                 cancer_areas[i - off:i + off, k - off:k + off] = 1
+
+    
 
     regions = torch.mul(image, cancer_areas)
 
@@ -111,6 +169,28 @@ def cancer_regions(sal_abs, image):
     ax[1].axis('off')
     ax[2].imshow(regions.cpu().detach().numpy().transpose(1, 2, 0))
     ax[2].axis('off')
+
+    wandb.log({"cancer cells" : wandb.Image(surrounding)})
+
+    
+    cancer_surrounding = torch.ones(3, 96, 96)
+    cancer_add = torch.zeros(3, 96, 96)
+
+    for i in range(0, 95):
+        for k in range(0, 95):
+            if cancer_areas[i,k] == 0:
+                if (cancer_areas[i-1,k] == 1 or cancer_areas[i+1,k] == 1 or cancer_areas[i,k-1] == 1 or cancer_areas[i,k+1] == 1):
+                    if (cancer_areas[i-1,k] == 0 or cancer_areas[i+1,k] == 0 or cancer_areas[i,k-1] == 0 or cancer_areas[i,k+1] == 0):
+                        cancer_surrounding[0,i,k]=0
+                        cancer_surrounding[1,i,k]=0
+                        cancer_surrounding[2,i,k]=0
+                        cancer_add[0,i,k]=1
+
+    
+    surrounding = torch.mul(image, cancer_surrounding)
+    surrounding = torch.add(surrounding, cancer_add)
+
+    wandb.log({"cancer cells" : wandb.Image(surrounding)})
 
     plt.tight_layout(pad=0.7)
     fig.suptitle('Focus on regions that made the model predict cancer')
@@ -127,6 +207,7 @@ def collect_images_with_gradient(grayscale, good_model, num_images, images):
 
     for batch, (X, y) in enumerate(image_data):
         if y==1:
+            print(X)
             X = X.to(device)
             X.requires_grad_()
             output = model(X)            
@@ -134,6 +215,24 @@ def collect_images_with_gradient(grayscale, good_model, num_images, images):
                 images.append(X)
         if len(images) >= num_images:
             break
+    
+    # Read a PIL image
+    image = Image.open('b.png')
+    
+    # Define a transform to convert PIL 
+    # image to a Torch tensor
+    transform = transforms.Compose([
+        transforms.ToTensor()
+    ])
+    
+    # transform = transforms.PILToTensor()
+    # Convert the PIL image to Torch tensor
+    img_tensor = transform(image)
+    img = img_tensor[0:3]
+    img = img[None, :]
+    img.requires_grad_()
+
+    images = [img, img]
 
     for image in images:
         # Retrieve output from the image
@@ -147,10 +246,10 @@ def collect_images_with_gradient(grayscale, good_model, num_images, images):
 def saliency_visualizer():
     # configure here
 
-    num_images = 3
+    num_images = 2
     images = []
     images = collect_images_with_gradient(False, True, num_images, images)
-    images = collect_images_with_gradient(False, False, num_images, images)
+    #images = collect_images_with_gradient(False, False, num_images, images)
     #images = collect_images_with_gradient(True, True, num_images, images)
 
     show_saliencies(images)
@@ -158,3 +257,7 @@ def saliency_visualizer():
 
 if __name__ == "__main__":
     saliency_visualizer()
+    
+    
+    
+    
