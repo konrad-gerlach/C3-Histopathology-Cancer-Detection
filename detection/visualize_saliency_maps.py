@@ -121,16 +121,16 @@ def collect_images_with_gradient(grayscale, good_model, num_images, images):
     image_data, device, model = setup(grayscale, good_model)
     num_images = len(images) + num_images
 
-    highly_cancerous = 0.999
+    highly_cancerous = 0
 
-    highly_non_cancerous = 0.01
+    highly_non_cancerous = 0.001
 
     for batch, (X, y) in enumerate(image_data):
         if y==1:
             X = X.to(device)
             X.requires_grad_()
-            output = model(X)
-            if output > highly_cancerous:
+            output = model(X)            
+            if torch.sigmoid(output) > highly_cancerous:
                 images.append(X)
         if len(images) >= num_images:
             break
@@ -140,26 +140,17 @@ def collect_images_with_gradient(grayscale, good_model, num_images, images):
         output = model(image)
         # Catch the output
         output.backward()
-
-        """
-        print(output)
-        output_idx = output.argmax()
-        output_max = output[0, output_idx]
-        print(output_max)
-        # Do backpropagation to get the derivative of the output based on the image
-        output_max.backward()
-        """
-
+     
     return images
 
 
 def saliency_visualizer():
     # configure here
 
-    num_images = 8
+    num_images = 3
     images = []
     images = collect_images_with_gradient(False, True, num_images, images)
-    #images = collect_images_with_gradient(False, False, num_images, images)
+    images = collect_images_with_gradient(False, False, num_images, images)
     #images = collect_images_with_gradient(True, True, num_images, images)
 
     show_saliencies(images)
