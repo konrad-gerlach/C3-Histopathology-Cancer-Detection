@@ -10,8 +10,7 @@ import helper
 # Inspired by: https://towardsdatascience.com/saliency-map-using-pytorch-68270fe45e80
 def setup(grayscale, good_model):
 
-    #setup to choose the desired artifacts
-
+    #setup to choose the desired artifacts and get right data
     if grayscale:
         config.LOAD_CONFIG["alias"] = "usable-black-and-white"
         config.DATA_CONFIG["grayscale"] = True
@@ -113,8 +112,9 @@ def collect_images_with_gradient(cancerous , grayscale, good_model, num_images, 
     image_data, device, model = setup(grayscale, good_model)
     num_images = len(images) + num_images
 
-    #configure 
-    cancer_threshold = 0
+    #configure
+    #no cancer threshold to get same images for (non)-colored
+    cancer_threshold = 0.99
     non_cancer_threshold = 0.01
 
     for batch, (image, y) in enumerate(image_data):

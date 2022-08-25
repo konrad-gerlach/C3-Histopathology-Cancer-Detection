@@ -59,7 +59,7 @@ DATA_CONFIG = dict(
     grayscale=False
 )
 
-#set the alias accordingly
+#set the alias accordingly for continuos training
 if DATA_CONFIG["grayscale"]:
     ALIAS="usable-black-and-white"
 else:
