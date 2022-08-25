@@ -201,13 +201,12 @@ def collect_images_with_gradient(grayscale, good_model, num_images, images):
     image_data, device, model = setup(grayscale, good_model)
     num_images = len(images) + num_images
 
-    highly_cancerous = 0
+    highly_cancerous = 0.99
 
     highly_non_cancerous = 0.001
 
     for batch, (X, y) in enumerate(image_data):
         if y==1:
-            print(X)
             X = X.to(device)
             X.requires_grad_()
             output = model(X)            
@@ -215,24 +214,6 @@ def collect_images_with_gradient(grayscale, good_model, num_images, images):
                 images.append(X)
         if len(images) >= num_images:
             break
-    
-    # Read a PIL image
-    image = Image.open('b.png')
-    
-    # Define a transform to convert PIL 
-    # image to a Torch tensor
-    transform = transforms.Compose([
-        transforms.ToTensor()
-    ])
-    
-    # transform = transforms.PILToTensor()
-    # Convert the PIL image to Torch tensor
-    img_tensor = transform(image)
-    img = img_tensor[0:3]
-    img = img[None, :]
-    img.requires_grad_()
-
-    images = [img, img]
 
     for image in images:
         # Retrieve output from the image
