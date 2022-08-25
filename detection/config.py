@@ -32,10 +32,6 @@ TRAINER_CONFIG = dict(
     # -pytorch approach no 1. was chosen)
 )
 
-LOAD_CONFIG = dict(
-    alias="usable"
-)
-
 # supports adam, adadelta, rmsprop, adagrad, sgd (with weight decay and momentum)
 # if none is selected, sgd is used
 # https://pytorch.org/docs/stable/optim.html
@@ -43,7 +39,7 @@ LOAD_CONFIG = dict(
 OPTIMIZER_CONFIG = dict(
     batch_size=64,
     use_optimizer="adam",
-    lr=0.01,
+    lr=0.001,
     weight_decay=0,
     alpha=0.99,  # For RmsProp
     betas=(0.9, 0.999),  # For Adam
@@ -59,7 +55,19 @@ DATA_CONFIG = dict(
     train_portion=0.67,
     test_portion=0.33,
     ds_path='datasets/cancer',
-    use_cache=True
+    use_cache=False,
+    grayscale=False
+)
+
+if DATA_CONFIG["grayscale"]:
+    ALIAS="usable-black-and-white"
+else:
+    ALIAS="usable-colored"
+
+
+
+LOAD_CONFIG = dict(
+    alias=ALIAS    
 )
 
 # default values
