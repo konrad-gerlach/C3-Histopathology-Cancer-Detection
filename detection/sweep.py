@@ -15,34 +15,35 @@ def run_sweep():
     sweep_config['metric'] = metric
 
     parameters_dict = {
-            'fc_layer_size': {
+        'fc_layer_size': {
             'values': [128, 256]
         },
-    'fc_layer_size': {
-        'values': [128, 256, 512, 1028]
+        'fc_layer_size': {
+            'values': [128, 256, 512, 1028]
         },
-    'fully_dropout': {
-          'values': [0.4, 0.5, 0.6, 0.7]
+        'fully_dropout': {
+            'values': [0.4, 0.5, 0.6, 0.7]
         },
-    'conv_dropout': {
-        'values': [0.1, 0.2, 0.3]
-    },
-    'batch_size': {
-          'values': [8, 16, 64]
+        'conv_dropout': {
+            'values': [0.1, 0.2, 0.3]
         },
-    'lr': {
-        # a flat distribution between 0 and 0.1
-        'distribution': 'log_uniform',
-        'min': math.log(0.0001),
-        'max': math.log(0.1)
-      },
-    'weight_decay': {
-        # a flat distribution between 0 and 0.1
-        'distribution': 'log_uniform',
-        'min': math.log(0.0001),
-        'max': math.log(0.1)
-      },
+        'batch_size': {
+            'values': [8, 16, 64]
+            },
+        'lr': {
+            # a flat distribution between 0 and 0.1
+            'distribution': 'log_uniform',
+            'min': math.log(0.0001),
+            'max': math.log(0.1)
+        },
+        'weight_decay': {
+            # a flat distribution between 0 and 0.1
+            'distribution': 'log_uniform',
+            'min': math.log(0.0001),
+            'max': math.log(0.1)
+        }
     }
+
     sweep_config['parameters'] = parameters_dict
 
     sweep_id = wandb.sweep(sweep_config, project=config.WANDB_CONFIG["project"], entity=config.WANDB_CONFIG["entity"])
