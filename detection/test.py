@@ -52,22 +52,20 @@ if __name__ == "__main__":
 
     _, data_loader, _ = data.get_dl(batch_size=32, num_workers=0)
     with torch.no_grad():
-        ground_truth = torch.tensor([])
-        predictions = torch.tensor([])
-        predict_list = []
-        truth_list = []
-        for batch, (X, y) in enumerate(data_loader):
-            truth_list.extend(y.tolist())
-            #new_ground_truth = torch.cat((ground_truth, y), 0)
-            #ground_truth = new_ground_truth
-            #X = X.to(device)
+        import csv
+
+        f = open('./submission2.csv', 'w')
+
+        writer = csv.writer(f)
+        header = ['id', 'label']
+        writer.writerow(header)
+
+        for batch, (X, y, names) in enumerate(data_loader):
             output = model(X)
             output = helper.predicted_lables(output)
-            predict_list.extend(output.tolist())
-            #new_predictions = torch.cat((predictions, output), 0)
-            #predictions = new_predictions
+            for i, x in enumerate(X):
+                writer.writerow([names[i], output[i][0].item()])
+                #print(i, int(output[i][0]), names[i])
             print(batch)
-
-        wandb.log({"pr": wandb.plot.pr_curve(truth_list, predict_list,
-                                             labels=['cancer'], classes_to_plot=[0])})
+        f.close()
         wandb.finish()

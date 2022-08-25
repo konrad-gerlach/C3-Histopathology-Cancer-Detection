@@ -7,7 +7,7 @@ import argparse
 
 def predicted_lables(pred):
     pred = torch.sigmoid(pred)
-    pred = torch.round(pred, decimals=0)
+    pred = torch.round(pred, decimals=3)
     return pred
 
 

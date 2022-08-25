@@ -82,11 +82,12 @@ class CancerDataset(VisionDataset):
                                 self.labels_frame.iloc[idx, 0] + ".tif")
         image = io.imread(img_name)
         label = self.labels_frame.iloc[idx, 1]
+        name = self.labels_frame.iloc[idx, 0]
 
         if self.transform:
             image = self.transform(image)
 
-        sample = [image, label]
+        sample = [image, label, name]
 
         return sample
 
@@ -99,11 +100,10 @@ def get_ds():
     transforms = torchvision.transforms.Compose( uncomposed_transforms)
     path = config.DATA_CONFIG["ds_path"]
     use_cache = config.DATA_CONFIG["use_cache"]
-    full_ds = CancerDataset(os.path.join(path, "train"), os.path.join(path, "train_labels.csv"), transforms)
+    full_ds = CancerDataset(os.path.join(path, "test"), os.path.join(path, "sample_submission.csv"), transforms)
     if use_cache:
         full_ds = CachingDataset(full_ds)
-    train_ds, test_ds = split_ds(full_ds)
-    return train_ds, test_ds
+    return full_ds, full_ds
 
 
 def split_ds(full_ds):
