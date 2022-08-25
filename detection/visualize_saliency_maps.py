@@ -170,9 +170,10 @@ def saliency_visualizer():
 
     # configure. minimum num_images is 2
     num_images = 3 
-    images = collect_images_with_gradient(cancerous=True ,grayscale=False, good_model=True, num_images=num_images, images=images)
     images = collect_images_with_gradient(cancerous=True ,grayscale=True, good_model=True, num_images=num_images, images=images)
-    images = collect_images_with_gradient(cancerous=True ,grayscale=False, good_model=True, num_images=num_images, images=images)
+    images = collect_images_with_gradient(cancerous=True ,grayscale=False, good_model=True, num_images=num_images, images=images)    
+    images = collect_images_with_gradient(cancerous=True ,grayscale=False, good_model=False, num_images=num_images, images=images)
+    images = collect_images_with_gradient(cancerous=True ,grayscale=True, good_model=True, num_images=num_images, images=images)
 
     show_saliencies(images)
 
