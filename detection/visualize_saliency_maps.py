@@ -1,3 +1,4 @@
+from email.mime import image
 import matplotlib.pyplot as plt
 import torch
 import config
@@ -108,7 +109,7 @@ def cancer_regions(sal_abs, image):
 
 
 # https://towardsdatascience.com/saliency-map-using-pytorch-68270fe45e80
-def collect_images_with_gradient(cancerous ,grayscale, good_model, num_images, images):
+def collect_images_with_gradient(cancerous , grayscale, good_model, num_images, images):
     image_data, device, model = setup(grayscale, good_model)
     num_images = len(images) + num_images
 
@@ -123,10 +124,11 @@ def collect_images_with_gradient(cancerous ,grayscale, good_model, num_images, i
                 image.requires_grad_()
                 # Retrieve output from the image
                 output = model(image)
+                print(torch.sigmoid(output))
                 if torch.sigmoid(output) > cancer_threshold:
                     # Do backpropagation to get the derivative of the output based on the image
                     output.backward()
-                    images.append(X)
+                    images.append(image)
         else:
             if y == 0:
                 image = image.to(device)
@@ -136,7 +138,7 @@ def collect_images_with_gradient(cancerous ,grayscale, good_model, num_images, i
                 if torch.sigmoid(output) < non_cancer_threshold:
                     # Do backpropagation to get the derivative of the output based on the image
                     output.backward()
-                    images.append(X)            
+                    images.append(image)            
 
         if len(images) >= num_images:
             break
@@ -148,11 +150,11 @@ def saliency_visualizer():
     images = []
 
     # configure. minimum num_images is 2
-    num_images = 7    
-    images = collect_images_with_gradient(cancerous=True ,grayscale=True, good_model=True, num_images=num_images, images=images)
-    images = collect_images_with_gradient(cancerous=False ,grayscale=False, good_model=True, num_images=num_images, images=images)
+    num_images = 3 
+    #images = collect_images_with_gradient(cancerous=True ,grayscale=True, good_model=True, num_images=num_images, images=images)
+    images = collect_images_with_gradient(cancerous=True ,grayscale=False, good_model=True, num_images=num_images, images=images)
 
-    return images
+    show_saliencies(images)
 
 
 if __name__ == "__main__":
