@@ -133,7 +133,7 @@ def collect_images_with_gradient(cancerous , grayscale, good_model, num_images, 
 
     #configure
     #no cancer threshold to get same images for (non)-colored
-    cancer_threshold = 0.99
+    cancer_threshold = 0
     non_cancer_threshold = 0.01
 
     for batch, (image, y) in enumerate(image_data):
