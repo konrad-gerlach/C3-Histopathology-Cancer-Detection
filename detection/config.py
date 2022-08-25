@@ -23,7 +23,7 @@ WANDB_CONFIG = dict(
 TRAINER_CONFIG = dict(
     max_epochs=100,
     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
-    continue_training=False,
+    continue_training=True,
     # if set to true the latest model for MODEL_CONFIG["model_class"] with alias LOAD_CONFIG["alias"] will be
     # downloaded and used for training
     accuracy_goal=0.95,  # model will be saved once this testing accuracy has been reached
@@ -59,13 +59,13 @@ DATA_CONFIG = dict(
     grayscale=False
 )
 
+#set the alias accordingly
 if DATA_CONFIG["grayscale"]:
     ALIAS="usable-black-and-white"
 else:
     ALIAS="usable-colored"
 
-
-
+#available aliasas usable-black-and-white, usable-colored, bad_colored
 LOAD_CONFIG = dict(
     alias=ALIAS    
 )

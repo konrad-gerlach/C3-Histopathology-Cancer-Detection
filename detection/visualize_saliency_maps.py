@@ -13,18 +13,18 @@ def setup(grayscale, good_model):
     #setup to choose the desired artifacts
 
     if grayscale:
+        config.LOAD_CONFIG["alias"] = "usable-black-and-white"
         config.DATA_CONFIG["grayscale"] = True
     else:
         config.DATA_CONFIG["grayscale"] = False
         if good_model:
             config.LOAD_CONFIG["alias"] = "usable-colored"
-        else: 
+        else:
             config.LOAD_CONFIG["alias"] = "bad_colored"         
 
     wandb_config = config.WANDB_CONFIG
     job_type = "saliency"
     run = wandb.init(project=wandb_config["project"], entity=wandb_config["entity"], job_type=job_type)
-
     model = helper.load_model(run)
     device = config.TRAINER_CONFIG["device"]
     model = model.to(device)
@@ -114,7 +114,7 @@ def collect_images_with_gradient(cancerous , grayscale, good_model, num_images, 
     num_images = len(images) + num_images
 
     #configure 
-    cancer_threshold = 0.99
+    cancer_threshold = 0
     non_cancer_threshold = 0.01
 
     for batch, (image, y) in enumerate(image_data):
@@ -124,7 +124,7 @@ def collect_images_with_gradient(cancerous , grayscale, good_model, num_images, 
                 image.requires_grad_()
                 # Retrieve output from the image
                 output = model(image)
-                print(torch.sigmoid(output))
+                
                 if torch.sigmoid(output) > cancer_threshold:
                     # Do backpropagation to get the derivative of the output based on the image
                     output.backward()
@@ -151,7 +151,8 @@ def saliency_visualizer():
 
     # configure. minimum num_images is 2
     num_images = 3 
-    #images = collect_images_with_gradient(cancerous=True ,grayscale=True, good_model=True, num_images=num_images, images=images)
+    images = collect_images_with_gradient(cancerous=True ,grayscale=False, good_model=True, num_images=num_images, images=images)
+    images = collect_images_with_gradient(cancerous=True ,grayscale=True, good_model=True, num_images=num_images, images=images)
     images = collect_images_with_gradient(cancerous=True ,grayscale=False, good_model=True, num_images=num_images, images=images)
 
     show_saliencies(images)
