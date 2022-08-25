@@ -50,10 +50,10 @@ def show_saliencies(images):
 
 
         #retrieve largest absolute value across all channels 
-        sal_abs, _ = torch.max(image_grads.abs(), dim=1)       
-
+        sal_abs, _ = torch.max(image_grads.abs(), dim=1)   
+        
         sal_abs = sal_abs.reshape(96, 96)
-
+      
         # Visualize the image and the saliency map
         img = next(iter(image)).reshape(-1, 96, 96)
         ax[0, i].imshow(img.cpu().detach().numpy().transpose(1, 2, 0))
@@ -94,13 +94,32 @@ def cancer_regions(sal_abs, image):
 
     regions = torch.mul(image, cancer_areas)
 
-    fig, ax = plt.subplots(1, 3)
+    cancer_surrounding = torch.ones(3, 96, 96)
+    cancer_surr_color = torch.zeros(3, 96, 96)
+
+    for i in range(0, 95):
+        for k in range(0, 95):
+            if cancer_areas[i,k] == 0:
+                if (cancer_areas[i-1,k] == 1 or cancer_areas[i+1,k] == 1 or cancer_areas[i,k-1] == 1 or cancer_areas[i,k+1] == 1):
+                    if (cancer_areas[i-1,k] == 0 or cancer_areas[i+1,k] == 0 or cancer_areas[i,k-1] == 0 or cancer_areas[i,k+1] == 0):
+                        cancer_surrounding[0,i,k]=0
+                        cancer_surrounding[1,i,k]=0
+                        cancer_surrounding[2,i,k]=0
+                        cancer_surr_color[0,i,k]=1
+
+    
+    surrounding = torch.mul(image, cancer_surrounding)
+    surrounding = torch.add(surrounding, cancer_surr_color)
+
+    fig, ax = plt.subplots(1, 4)
     ax[0].imshow(image.cpu().detach().numpy().transpose(1, 2, 0))
     ax[0].axis('off')
     ax[1].imshow(sal_abs.cpu(), cmap='inferno')
     ax[1].axis('off')
     ax[2].imshow(regions.cpu().detach().numpy().transpose(1, 2, 0))
     ax[2].axis('off')
+    ax[3].imshow(surrounding.cpu().detach().numpy().transpose(1, 2, 0))
+    ax[3].axis('off')
 
     plt.tight_layout(pad=0.7)
     fig.suptitle('Focus on regions that made the model predict cancer')
