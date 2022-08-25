@@ -67,6 +67,11 @@ def show_saliencies(images):
         ax[4, i].imshow(sal_abs.cpu(), cmap='inferno')
         ax[4, i].axis('off')
 
+        #also log in wandb
+        inferno = plt.get_cmap('inferno')
+        wandb.log({"Sal_abs": wandb.Image(inferno(sal_abs))})
+
+
 
     wandb.log({"Cancer images with saliency maps": plt})
 
@@ -169,7 +174,7 @@ def saliency_visualizer():
     images = []
 
     # configure. minimum num_images is 2
-    num_images = 3 
+    num_images = 3
     images = collect_images_with_gradient(cancerous=True ,grayscale=True, good_model=True, num_images=num_images, images=images)
     images = collect_images_with_gradient(cancerous=True ,grayscale=False, good_model=True, num_images=num_images, images=images)    
     images = collect_images_with_gradient(cancerous=True ,grayscale=False, good_model=False, num_images=num_images, images=images)
