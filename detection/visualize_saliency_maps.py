@@ -97,7 +97,7 @@ def cancer_regions(sal_abs, image):
     fig, ax = plt.subplots(1, 3)
     ax[0].imshow(image.cpu().detach().numpy().transpose(1, 2, 0))
     ax[0].axis('off')
-    ax[1].imshow(sal_abs.cpu(), cmap='hot')
+    ax[1].imshow(sal_abs.cpu(), cmap='inferno')
     ax[1].axis('off')
     ax[2].imshow(regions.cpu().detach().numpy().transpose(1, 2, 0))
     ax[2].axis('off')
