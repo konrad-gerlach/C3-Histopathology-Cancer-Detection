@@ -41,6 +41,7 @@ def load_competition_from_kaggle(competition, path):
     api.competition_download_files(competition, path, quiet=False)
     unzip_competition_files(competition, path)
 
+
 def load_cancer_ds():
     competition = 'histopathologic-cancer-detection'
     path = config.DATA_CONFIG["ds_path"]
@@ -96,7 +97,7 @@ def get_ds():
     uncomposed_transforms = [torchvision.transforms.ToTensor(), torchvision.transforms.Resize([96, 96])]
     if config.DATA_CONFIG["grayscale"]:
         uncomposed_transforms.append(torchvision.transforms.Grayscale(3))
-    transforms = torchvision.transforms.Compose( uncomposed_transforms)
+    transforms = torchvision.transforms.Compose(uncomposed_transforms)
     path = config.DATA_CONFIG["ds_path"]
     use_cache = config.DATA_CONFIG["use_cache"]
     full_ds = CancerDataset(os.path.join(path, "train"), os.path.join(path, "train_labels.csv"), transforms)
@@ -110,8 +111,10 @@ def split_ds(full_ds):
     train_size = int(config.DATA_CONFIG["train_portion"] * len(full_ds))
     test_size = int(config.DATA_CONFIG["test_portion"] * len(full_ds))
     remainder = len(full_ds) - train_size
-    train_ds, remainder_ds = torch.utils.data.random_split(full_ds, [train_size, remainder], generator=torch.Generator().manual_seed(42))
-    test_ds, remainder_ds = torch.utils.data.random_split(remainder_ds, [test_size, remainder - test_size], generator=torch.Generator().manual_seed(42))
+    train_ds, remainder_ds = torch.utils.data.random_split(full_ds, [train_size, remainder],
+                                                           generator=torch.Generator().manual_seed(42))
+    test_ds, remainder_ds = torch.utils.data.random_split(remainder_ds, [test_size, remainder - test_size],
+                                                          generator=torch.Generator().manual_seed(42))
     return train_ds, test_ds
 
 
