@@ -11,31 +11,30 @@ def predicted_lables(pred):
     return pred
 
 
-def choose_optimizer(optimizer_config, parameters, gradient_accumulation, learning_rate=1e-3):
+def choose_optimizer(optimizer_config, parameters, learning_rate):
     use_optimizer = optimizer_config["use_optimizer"].lower()
-    learning_rate = learning_rate / gradient_accumulation
+    weigth_decay = optimizer_config["weight_decay"]
+
     if use_optimizer == "adam":
         return torch.optim.Adam(parameters, lr=learning_rate, betas=optimizer_config["betas"],
-                                eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"],
+                                eps=optimizer_config["eps"], weight_decay=weigth_decay,
                                 amsgrad=optimizer_config["amsgrad"])
     elif use_optimizer == "adadelta":
         return torch.optim.Adadelta(parameters, lr=learning_rate, rho=optimizer_config["rho"],
-                                    eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"])
+                                    eps=optimizer_config["eps"], weight_decay=weigth_decay)
     elif use_optimizer == "adagrad":
         return torch.optim.Adagrad(parameters, lr=learning_rate, lr_decay=optimizer_config["lr_decay"],
-                                   weight_decay=optimizer_config["weight_decay"])
+                                   weight_decay=weigth_decay)
     elif use_optimizer == "rmsprop":
         return torch.optim.RMSprop(parameters, lr=learning_rate, alpha=optimizer_config["alpha"],
-                                   eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"],
+                                   eps=optimizer_config["eps"], weight_decay=weigth_decay,
                                    momentum=optimizer_config["momentum"])
     elif use_optimizer == "sgd":
         return torch.optim.SGD(parameters, lr=learning_rate, momentum=optimizer_config["momentum"],
-                               weight_decay=optimizer_config["weight_decay"])
+                               weight_decay=weigth_decay)
 
     else:
-        return torch.optim.Adam(parameters, lr=learning_rate, betas=optimizer_config["betas"],
-                                eps=optimizer_config["eps"], weight_decay=optimizer_config["weight_decay"],
-                                amsgrad=optimizer_config["amsgrad"])
+        return torch.optim.SGD(parameters, lr=learning_rate)
 
 
 def log_metadata(optimizer):

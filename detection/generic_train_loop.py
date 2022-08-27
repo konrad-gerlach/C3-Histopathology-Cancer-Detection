@@ -1,8 +1,11 @@
 import torch
-import helper
-import wandb
 
-def train_loop(batch,X,y, device, model,loss_fn, gradient_accumulation,optimizer,logger,inputs):
+def training_loss_function(outputs,y):
+    return nn.BCEWithLogitsLoss()(outputs[-1],y)
+
+def train_loop(batch, X, y, device, model, gradient_accumulation, optimizer, logger, metrics):
+
+    loss_fn = training_loss_function
 
     # Compute prediction and loss
     X = X.to(device, non_blocking=True)
@@ -18,5 +21,5 @@ def train_loop(batch,X,y, device, model,loss_fn, gradient_accumulation,optimizer
         optimizer.step()
         optimizer.zero_grad()
     
-    inputs = logger(outputs,loss,batch,X,y,inputs)
-    return inputs
+    metrics = logger(outputs, loss, batch, X, y, metrics)
+    return metrics
