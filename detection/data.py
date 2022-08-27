@@ -127,7 +127,6 @@ def get_dl(batch_size, num_workers, pin_memory=True):
 
 
 def show(images, labels):
-    # Here _ means that we ignore (not use) variables
     _, figs = plt.subplots(1, len(images), figsize=(200, 200))
     for f, img, lbl in zip(figs, images, labels):
         f.imshow(torchvision.transforms.ToPILImage()(img))
@@ -141,6 +140,7 @@ def show(images, labels):
 
 
 if __name__ == "__main__":
+    #show some example images
     train_dataloader, test_dataloader, img_shape = get_dl(batch_size=4, num_workers=4)
 
     for batch, (X, y) in enumerate(train_dataloader):
