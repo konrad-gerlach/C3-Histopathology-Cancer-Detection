@@ -97,3 +97,10 @@ def define_dataset_location():
     args = parser.parse_args()
     config.DATA_CONFIG["ds_path"] = args.ds_path
     print(config.DATA_CONFIG["ds_path"])
+
+def job_type_of_training():
+    continue_training = config.TRAINER_CONFIG["continue_training"]
+    if continue_training:
+        return "resume_training_classifier"
+    else:
+        return "train_classifier"

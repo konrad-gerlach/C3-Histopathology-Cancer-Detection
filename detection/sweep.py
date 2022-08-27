@@ -54,11 +54,7 @@ def run_sweep():
 
 
 def run_sweep_run(sweep_config=None):
-    continue_training = config.TRAINER_CONFIG["continue_training"]
-    if continue_training:
-        job_type = "resume_training_classifier"
-    else:
-        job_type = "train_classifier"
+    job_type = helper.job_type_of_training()
 
     with wandb.init(project=config.WANDB_CONFIG["project"], entity=config.WANDB_CONFIG["entity"], config=sweep_config, job_type=job_type) as run:
         sweep_config = wandb.config
