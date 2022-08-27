@@ -1,8 +1,6 @@
 from __future__ import print_function, division
 import torch
 from torch import nn
-import feature_visualization
-import model
 import data
 import wandb
 import config
@@ -16,12 +14,33 @@ def get_model():
     # insert values from SP_MODEL_CONFIG here if necessary
     return config.MODEL_CONFIG["model_class"](**config.SP_MODEL_CONFIG)
 
-def train(model, train_dataloader, test_dataloader, optimizer, device, gradient_accumulation,epochs=5):
+def run_trainer(run=None):
+    model_config = config.MODEL_CONFIG
+    optimizer_config = config.OPTIMIZER_CONFIG
+    trainer_config = config.TRAINER_CONFIG
+    wandb_config = config.WANDB_CONFIG
+    continue_training = trainer_config["continue_training"]
+    gradient_accumulation=trainer_config["gradient_accumulation"]
     loss_fn = training_loss_function
-    train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, device, epochs, gradient_accumulation)
+
+    helper.define_dataset_location()
+    if run is None:
+        run = setup_wandb(wandb_config)
+
+    train_dataloader, test_dataloader, model, optimizer = setup_training(optimizer_config, model_config, trainer_config,
+                                                                        run, continue_training, gradient_accumulation)
+
+    log_with_wandb(trainer_config, optimizer_config, model, optimizer)
+
+    train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, trainer_config["device"],
+                trainer_config["max_epochs"], gradient_accumulation)
+
+    finish__training(run, model, optimizer)
+
 
 def training_loss_function(outputs,y):
     return nn.BCEWithLogitsLoss()(outputs[-1],y)
+
 
 def training_logger(outputs,loss,batch,X,y,inputs):
     inputs["train_epoch_loss"] += float(loss)
@@ -69,52 +88,43 @@ def train_loop(model, train_dataloader, test_dataloader, loss_fn, optimizer, dev
         wandb.log({"train loss per epoch": inputs["train_epoch_loss"]})
         print('epoch {}, train loss {}'.format(epoch+1,  inputs["train_epoch_loss"]))
 
-        test_loss_epoch, epoch_acc = test.test_loop(model, test_dataloader, loss_fn, device, epoch)
+        epoch_acc = test.test_loop(model, test_dataloader, loss_fn, device, epoch)
         if epoch_acc > config.TRAINER_CONFIG["accuracy_goal"]:
             return
 
 
-def classifier():
-    wandb_config = config.WANDB_CONFIG
-    continue_training = config.TRAINER_CONFIG["continue_training"]
+def setup_wandb(wandb_config):
+    wandb.config = wandb_config
+    return wandb.init(project=wandb_config["project"], entity=wandb_config["entity"])
+
+
+def setup_training(optimizer_config, model_config, trainer_config, run, continue_training, gradient_accumulation):
+    model = get_model()
     if continue_training:
-        job_type = "resume_training_classifier"
-    else:
-        job_type = "train_classifier"
-    wandb.config = {}
-    run = wandb.init(project=wandb_config["project"], entity=wandb_config["entity"], job_type=job_type)
-    run_classifier(run, continue_training)
+        model.load_state_dict(torch.load(trainer_config["model_path"]))
+    model = model.to(trainer_config["device"])
+    optimizer = optimizer_config["optimizer_class"](model.parameters(), **optimizer_config["optimizer_config"])
+    train_dataloader = data.get_dataloader(data.TRAIN_DATASET, trainer_config["batch_size"], trainer_config["device"])
+    test_dataloader = data.get_dataloader(data.TEST_DATASET, trainer_config["batch_size"], trainer_config["device"])
+    return train_dataloader, test_dataloader, model, optimizer
 
 
-def run_classifier(run, continue_training):
-    model_config = config.MODEL_CONFIG
-    optimizer_config = config.OPTIMIZER_CONFIG
-    trainer_config = config.TRAINER_CONFIG
+def log_with_wandb(trainer_config, optimizer_config, model, optimizer):
+    logging_config = helper.log_metadata(trainer_config, optimizer_config, optimizer)
 
-    train_dataloader, test_dataloader, img_shape = data.get_dl(batch_size=optimizer_config["batch_size"],
-                                                               num_workers=model_config["num_workers"])
-    if continue_training:
-        model = helper.load_model(run)
-    else:
-        model = get_model()
-
-    optimizer = helper.choose_optimizer(optimizer_config, model.parameters(), config.TRAINER_CONFIG["gradient_accumulation"], learning_rate=config.OPTIMIZER_CONFIG["lr"])
-    logging_config = helper.log_metadata(optimizer)
- 
-    #wandb.init(project=trainer_config["project"], entity="histo-cancer-detection", config=logging_config)
     wandb.config.update(logging_config)
-   
+
     wandb.watch(model, criterion=None, log="gradients", log_freq=1000, idx=None, log_graph=(True))
 
     print("You are currently using the optimizer: {}".format(optimizer))
     print(trainer_config["device"])
 
-    train(model, train_dataloader, test_dataloader, optimizer, trainer_config["device"],
-          trainer_config["gradient_accumulation"], epochs=trainer_config["max_epochs"])
-    helper.log_model(run, model, optimizer)
 
+def finish__training(run, model, optimizer):
+    helper.log_model(run, model)
     wandb.finish()
+
 
 if __name__ == "__main__":
     helper.define_dataset_location()
-    classifier()
+    run_trainer()

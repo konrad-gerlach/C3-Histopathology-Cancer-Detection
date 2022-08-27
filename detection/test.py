@@ -34,4 +34,4 @@ def test_loop(model, test_dataloader, loss_fn, device, epoch):
     wandb.log({"test loss per epoch": test_loss_epoch})
     wandb.log({"test accuracy per epoch": epoch_acc})
     print('epoch {}, test loss {}, accuracy {}'.format(epoch + 1, test_loss_epoch, epoch_acc))
-    return test_loss_epoch, epoch_acc
+    return epoch_acc
