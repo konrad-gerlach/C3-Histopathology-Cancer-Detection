@@ -9,9 +9,9 @@ from skimage import io
 import os
 import pandas as pd
 import config
-
-YOUR_KAGGLE_USERNAME = 'tillwenke'
-YOUR_KAGGLE_KEY = '77fa31c0ce740e0419026a3524757c91'
+KAGGLE = dict(
+YOUR_KAGGLE_USERNAME = 'tillwenke',
+YOUR_KAGGLE_KEY = '77fa31c0ce740e0419026a3524757c91')
 
 
 # https://lindevs.com/download-dataset-from-kaggle-using-api-and-python/
@@ -34,8 +34,8 @@ def unzip_competition_files(competition, path):
 
 
 def load_competition_from_kaggle(competition, path):
-    os.environ['KAGGLE_USERNAME'] = 
-    os.environ['KAGGLE_KEY'] = 
+    os.environ['KAGGLE_USERNAME'] = 'tillwenke'
+    os.environ['KAGGLE_KEY'] = '77fa31c0ce740e0419026a3524757c91'
 
     from kaggle.api.kaggle_api_extended import KaggleApi
     api = KaggleApi()
@@ -121,7 +121,8 @@ def split_ds(full_ds):
     return train_ds, test_ds
 
 
-def get_dl(batch_size, num_workers, pin_memory=True):
+def get_dl(batch_size, pin_memory=True):
+    num_workers = config.DATA_CONFIG["num_workers"]
     train_ds, test_ds = get_ds()
     img_shape = train_ds[0][0].shape
     train_dl = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
@@ -129,7 +130,7 @@ def get_dl(batch_size, num_workers, pin_memory=True):
     return train_dl, test_dl, img_shape
 
 
-def show(images, labels):
+def show_images(images, labels):
     _, figs = plt.subplots(1, len(images), figsize=(200, 200))
     for f, img, lbl in zip(figs, images, labels):
         f.imshow(torchvision.transforms.ToPILImage()(img))
@@ -143,11 +144,11 @@ def show(images, labels):
 
 
 if __name__ == "__main__":
-    #show some example images
-    train_dataloader, test_dataloader, img_shape = get_dl(batch_size=4, num_workers=4)
+    # show some example images
+    train_dataloader, test_dataloader, img_shape = get_dl(batch_size=4)
 
     for batch, (X, y) in enumerate(train_dataloader):
-        show(X, y)
+        show_images(X, y)
         if batch == 0:
             break
     plt.show()
