@@ -98,14 +98,14 @@ def train_loop(model, train_dataloader, test_dataloader, optimizer, device, epoc
         wandb.log({"epoch": epoch})
         
         for batch, (X, y) in enumerate(train_dataloader):
-            metrics = generic_train_loop.train_loop(batch, X, y, device, model, gradient_accumulation, optimizer, training_logger, metrics)
+            metrics = generic_train_loop.train_loop(X, y, device, model, training_logger, metrics, gradient_accumulation, optimizer, batch)
         
         # loss while training
         metrics["train_epoch_loss"] /= len(train_dataloader.dataset)
         wandb.log({"train loss per epoch": metrics["train_epoch_loss"]})
         print('epoch {}, train loss {}'.format(epoch+1,  metrics["train_epoch_loss"]))
 
-        epoch_acc = test.test_loop(model, test_dataloader, loss_fn, device, epoch)
+        epoch_acc = test.test_loop(model, test_dataloader, device, epoch)
         if epoch_acc > config.TRAINER_CONFIG["accuracy_goal"]:
             return
 

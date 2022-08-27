@@ -3,7 +3,7 @@ import torch
 def training_loss_function(outputs,y):
     return nn.BCEWithLogitsLoss()(outputs[-1],y)
 
-def train_loop(batch, X, y, device, model, gradient_accumulation, optimizer, logger, metrics):
+def train_loop(X, y, device, model, logger, metrics, gradient_accumulation=1, optimizer=None, batch=0):
 
     loss_fn = training_loss_function
 
@@ -16,10 +16,11 @@ def train_loop(batch, X, y, device, model, gradient_accumulation, optimizer, log
     loss = loss_fn(outputs, y)
 
     # Backpropagation with gradient accumulation
-    loss.backward()
-    if batch % gradient_accumulation == 0:
-        optimizer.step()
-        optimizer.zero_grad()
+    if optimizer:
+        loss.backward()
+        if batch % gradient_accumulation == 0:
+            optimizer.step()
+            optimizer.zero_grad()
     
     metrics = logger(outputs, loss, batch, X, y, metrics)
     return metrics

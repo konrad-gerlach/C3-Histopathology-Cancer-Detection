@@ -73,7 +73,7 @@ def visualizer_loop(model, loss_fn, optimizer, device, epochs, gradient_accumula
 def get_data_examples(model,device,loss_fn):
     model = model.to(device)
     model.eval()
-    train_dl, test_dl, img_shape = data.get_dl(config.OPTIMIZER_CONFIG["batch_size"],config.MODEL_CONFIG["num_workers"])
+    train_dl, test_dl, img_shape = data.get_dl(config.OPTIMIZER_CONFIG["batch_size"])
     results = []
     with torch.no_grad():
         for batch, (X,y) in enumerate(test_dl):
@@ -99,7 +99,7 @@ def setup_wandb():
 def run_visualizer(run):
     model = helper.load_model(run)
 
-    _, _, img_shape = data.get_dl(config.OPTIMIZER_CONFIG["batch_size"],config.MODEL_CONFIG["num_workers"])
+    _, _, img_shape = data.get_dl(config.OPTIMIZER_CONFIG["batch_size"])
     sample_input = generate_initial_sample(img_shape)
     optimizer = helper.choose_optimizer(config.OPTIMIZER_CONFIG,[sample_input], config.TRAINER_CONFIG["gradient_accumulation"], learning_rate=config.OPTIMIZER_CONFIG["lr"])
     logging_config = helper.log_metadata(optimizer)
