@@ -1,9 +1,7 @@
 import torch
 import model
 
-# default values
 MODEL_CONFIG = dict(
-    num_workers=4,
     model_class=model.Big_Konrad
 )
 
@@ -14,7 +12,6 @@ SP_MODEL_CONFIG = dict(
     fc_layer_size=200
 )
 
-# rename wandb config
 WANDB_CONFIG = dict(
     project="histo_cancer",
     entity="histo-cancer-detection"
@@ -29,14 +26,13 @@ TRAINER_CONFIG = dict(
     accuracy_goal=0.97,  # model will be saved once this testing accuracy has been reached
     gradient_accumulation=1,
     # https://stackoverflow.com/questions/63815311/what-is-the-correct-way-to-implement-gradient-accumulation-in
-    # -pytorch approach no 1. was chosen)
-    mode = "feature_visualization" #supports training,sweeps,feature_visualization
+    # (pytorch approach no 1. was chosen)
+    mode = "training" #supports training,sweeps,feature_visualization
 )
 
-# supports adam, adadelta, rmsprop, adagrad, sgd (with weight decay and momentum)
-# if none is selected, sgd is used
+# supports adam, rmsprop, sgd (with weight decay and momentum)
+# default is sgd
 # https://pytorch.org/docs/stable/optim.html
-# default values
 OPTIMIZER_CONFIG = dict(
     batch_size=64,
     use_optimizer="adam",
@@ -44,15 +40,14 @@ OPTIMIZER_CONFIG = dict(
     weight_decay=0,
     alpha=0.99,  # For RmsProp
     betas=(0.9, 0.999),  # For Adam
-    rho=0.9,  # For Adadelta
     eps=1e-08,
     amsgrad=False,
     momentum=0,
     lr_decay=0.1,
 )
 
-# default values
 DATA_CONFIG = dict(
+    num_workers=4,
     train_portion=0.67,
     test_portion=0.33,
     ds_path='datasets/cancer',
@@ -69,10 +64,9 @@ else:
 #available aliasas usable-black-and-white, usable-colored, bad_colored
 LOAD_CONFIG = dict(
     alias=ALIAS,
-    name="Big_Konrad"  
+    name="Big_Konrad"
 )
 
-# default values
 SWEEP_CONFIG = dict(
     train_portion=0.1,
     test_portion=0.1,
