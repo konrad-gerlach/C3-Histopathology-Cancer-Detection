@@ -27,7 +27,7 @@ TRAINER_CONFIG = dict(
     gradient_accumulation=1,
     # https://stackoverflow.com/questions/63815311/what-is-the-correct-way-to-implement-gradient-accumulation-in
     # (pytorch approach no 1. was chosen)
-    mode = "training" #supports training,sweeps,feature_visualization
+    mode = "training" #supports training,sweeps,feature_visualization, saliency_maps
 )
 
 # supports adam, rmsprop, sgd (with weight decay and momentum)

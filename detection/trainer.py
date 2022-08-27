@@ -1,6 +1,4 @@
 from __future__ import print_function, division
-import torch
-from torch import nn
 import data
 import wandb
 import config
@@ -14,28 +12,21 @@ def get_model():
 def run_trainer(run=None, continue_training=False):
     optimizer_config = config.OPTIMIZER_CONFIG
     trainer_config = config.TRAINER_CONFIG
-    wandb_config = config.WANDB_CONFIG
     gradient_accumulation=trainer_config["gradient_accumulation"]
 
     helper.define_dataset_location()
     if run is None:
-        run = setup_wandb(wandb_config)
+        run = helper.setup_wandb(job_type=helper.job_type_of_training())
         continue_training = trainer_config["continue_training"]
 
     train_dataloader, test_dataloader, model, optimizer = setup_training(optimizer_config, run, continue_training, gradient_accumulation)
 
-    log_with_wandb(trainer_config, optimizer_config, model, optimizer)
+    log_with_wandb(trainer_config, model, optimizer)
 
     train_loop(model, train_dataloader, test_dataloader, optimizer, trainer_config["device"], trainer_config["max_epochs"], gradient_accumulation)
 
     finish__training(run, model)
-
-
-def setup_wandb(wandb_config):
-    wandb.config = {}
-    return wandb.init(project=wandb_config["project"], entity=wandb_config["entity"], job_type=helper.job_type_of_training())
-
-
+    
 def setup_training(optimizer_config, run, continue_training, gradient_accumulation):
     train_dataloader, test_dataloader, __ = data.get_dl(batch_size=optimizer_config["batch_size"])
     if continue_training:
@@ -48,8 +39,8 @@ def setup_training(optimizer_config, run, continue_training, gradient_accumulati
     return train_dataloader, test_dataloader, model, optimizer
 
 
-def log_with_wandb(trainer_config, optimizer_config, model, optimizer):
-    logging_config = helper.log_metadata(trainer_config, optimizer_config, optimizer)
+def log_with_wandb(trainer_config, model, optimizer):
+    logging_config = helper.log_metadata(optimizer)
 
     wandb.config.update(logging_config)
 

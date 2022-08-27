@@ -1,11 +1,13 @@
 import torch
+from torch import nn
 
 def training_loss_function(outputs,y):
     return nn.BCEWithLogitsLoss()(outputs[-1],y)
 
-def train_loop(X, y, device, model, logger, metrics, gradient_accumulation=1, optimizer=None, batch=0):
+def train_loop(X, y, device, model, logger, metrics, gradient_accumulation=1, optimizer=None, batch=0, loss_fn=None):
 
-    loss_fn = training_loss_function
+    if loss_fn is None:
+        loss_fn = training_loss_function
 
     # Compute prediction and loss
     X = X.to(device, non_blocking=True)

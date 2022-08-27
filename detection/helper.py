@@ -4,6 +4,7 @@ import wandb
 import config
 import argparse
 
+# TRAINING AND TESTING
 
 def predicted_lables(pred):
     pred = torch.sigmoid(pred)
@@ -19,12 +20,6 @@ def choose_optimizer(optimizer_config, parameters, learning_rate):
         return torch.optim.Adam(parameters, lr=learning_rate, betas=optimizer_config["betas"],
                                 eps=optimizer_config["eps"], weight_decay=weigth_decay,
                                 amsgrad=optimizer_config["amsgrad"])
-    elif use_optimizer == "adadelta":
-        return torch.optim.Adadelta(parameters, lr=learning_rate, rho=optimizer_config["rho"],
-                                    eps=optimizer_config["eps"], weight_decay=weigth_decay)
-    elif use_optimizer == "adagrad":
-        return torch.optim.Adagrad(parameters, lr=learning_rate, lr_decay=optimizer_config["lr_decay"],
-                                   weight_decay=weigth_decay)
     elif use_optimizer == "rmsprop":
         return torch.optim.RMSprop(parameters, lr=learning_rate, alpha=optimizer_config["alpha"],
                                    eps=optimizer_config["eps"], weight_decay=weigth_decay,
@@ -36,6 +31,7 @@ def choose_optimizer(optimizer_config, parameters, learning_rate):
     else:
         return torch.optim.SGD(parameters, lr=learning_rate)
 
+# LOGGING
 
 def log_metadata(optimizer):
     lines = str(optimizer).split("\n")
@@ -59,7 +55,7 @@ def log_metadata(optimizer):
     return logging_config
 
 
-def log_model(run,model,optimizer):
+def log_model(run,model):
     log_model_as_artifact(run,model,config.LOAD_CONFIG["name"],"the trained parameters",config.SP_MODEL_CONFIG)
 
 
@@ -73,6 +69,7 @@ def log_model_as_artifact(run, model, name, description, config):
     wandb.save("trained_model.pth")
     run.log_artifact(model_artifact)
 
+# LOADING
 
 def load_model(run):
     return load_model_from_artifact(run,config.MODEL_CONFIG["model_class"],config.LOAD_CONFIG["name"],config.LOAD_CONFIG["alias"])
@@ -88,6 +85,18 @@ def load_model_from_artifact(run,model_class,name, alias):
     model.load_state_dict(torch.load(model_path, map_location=config.TRAINER_CONFIG["device"]))
     return model
 
+# WANDB
+def job_type_of_training():
+    continue_training = config.TRAINER_CONFIG["continue_training"]
+    if continue_training:
+        return "resume_training_classifier"
+    return "train_classifier"
+
+def setup_wandb(job_type):
+    wandb.config = {}
+    return wandb.init(project=config.WANDB_CONFIG["project"], entity=config.WANDB_CONFIG["entity"], job_type=job_type)
+
+# MISCELLANEOUS
 
 def define_dataset_location():
     parser = argparse.ArgumentParser(description='configure project')
@@ -97,10 +106,3 @@ def define_dataset_location():
     args = parser.parse_args()
     config.DATA_CONFIG["ds_path"] = args.ds_path
     print(config.DATA_CONFIG["ds_path"])
-
-def job_type_of_training():
-    continue_training = config.TRAINER_CONFIG["continue_training"]
-    if continue_training:
-        return "resume_training_classifier"
-    else:
-        return "train_classifier"

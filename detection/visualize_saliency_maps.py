@@ -171,7 +171,7 @@ def collect_images_with_gradient(cancerous , grayscale, good_model, num_images, 
     return images
 
 
-def saliency_visualizer():
+def run_saliency_visualizer():
     images = []
 
     # configure. minimum num_images is 2
@@ -185,4 +185,4 @@ def saliency_visualizer():
 
 
 if __name__ == "__main__":
-    saliency_visualizer()
+    run_saliency_visualizer()

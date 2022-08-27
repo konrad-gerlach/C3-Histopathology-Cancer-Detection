@@ -28,8 +28,9 @@ def test_loop(model, test_dataloader, device, epoch):
 
 # batch and X are not used in this function but are needed for the generic_train_loop
 def test_logger(outputs, loss, batch, X, y_test, metrics):
+    pred = outputs[-1]
     metrics["test_loss_epoch"] += float(loss)
-    pred_lables_test = helper.predicted_lables(outputs)
+    pred_lables_test = helper.predicted_lables(pred)
     metrics["n"] += len(y_test)
     metrics["correct_pred"] += float((pred_lables_test == y_test).sum())
 

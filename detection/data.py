@@ -129,7 +129,7 @@ def get_dl(batch_size, pin_memory=True):
     test_dl = DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory)
     return train_dl, test_dl, img_shape
 
-
+# prolly wont work in colab
 def show_images(images, labels):
     _, figs = plt.subplots(1, len(images), figsize=(200, 200))
     for f, img, lbl in zip(figs, images, labels):
