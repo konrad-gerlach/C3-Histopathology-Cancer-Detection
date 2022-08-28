@@ -9,6 +9,9 @@ from skimage import io
 import os
 import pandas as pd
 import config
+KAGGLE = dict(
+YOUR_KAGGLE_USERNAME = 'tillwenke',
+YOUR_KAGGLE_KEY = '77fa31c0ce740e0419026a3524757c91')
 
 
 # https://lindevs.com/download-dataset-from-kaggle-using-api-and-python/
@@ -46,7 +49,7 @@ def load_cancer_ds():
     competition = 'histopathologic-cancer-detection'
     path = config.DATA_CONFIG["ds_path"]
 
-    if not os.path.exists(path):
+    if not os.path.exists(os.path.abspath(path)):
         load_competition_from_kaggle(competition, path)
 
 
@@ -118,16 +121,16 @@ def split_ds(full_ds):
     return train_ds, test_ds
 
 
-def get_dl(batch_size, num_workers, pin_memory=True):
+def get_dl(batch_size, pin_memory=True):
+    num_workers = config.DATA_CONFIG["num_workers"]
     train_ds, test_ds = get_ds()
     img_shape = train_ds[0][0].shape
     train_dl = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
     test_dl = DataLoader(test_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory)
     return train_dl, test_dl, img_shape
 
-
-def show(images, labels):
-    # Here _ means that we ignore (not use) variables
+# prolly wont work in colab
+def show_images(images, labels):
     _, figs = plt.subplots(1, len(images), figsize=(200, 200))
     for f, img, lbl in zip(figs, images, labels):
         f.imshow(torchvision.transforms.ToPILImage()(img))
@@ -141,10 +144,11 @@ def show(images, labels):
 
 
 if __name__ == "__main__":
-    train_dataloader, test_dataloader, img_shape = get_dl(batch_size=4, num_workers=4)
+    # show some example images
+    train_dataloader, test_dataloader, img_shape = get_dl(batch_size=4)
 
     for batch, (X, y) in enumerate(train_dataloader):
-        show(X, y)
+        show_images(X, y)
         if batch == 0:
             break
     plt.show()

@@ -1,36 +1,37 @@
 import torch
 import helper
 import wandb
+import generic_train_loop
 
 
-def test_loop(model, test_dataloader, loss_fn, device, epoch):
-    # test loss and accuracy
-    # https://colab.research.google.com/drive/1LHDUxiuG1niSOTiK9vRBlX47403OI15H?authuser=1#scrollTo=yoek_AxoQiNg
+def test_loop(model, test_dataloader, device, epoch):
     model.eval()
-    correct_pred = 0
-    n = 0
+    metrics = dict(
+            test_loss_epoch = 0.0,
+            epoch_acc = 0,
+            correct_pred = 0,
+            n = 0
+        )
 
     with torch.no_grad():
-        test_loss_epoch = 0.0
         test_iter = enumerate(test_dataloader)
         for _, (X_test, y_test) in test_iter:
-            X_test = X_test.to(device)
-            y_test = y_test.to(device)
-            y_test = y_test.view(-1, 1).to(torch.float)
+            metrics = generic_train_loop.train_loop(X_test, y_test, device, model, test_logger, metrics)
 
-            pred_test = model(X_test)
+        metrics["test_loss_epoch"] /= len(test_dataloader)
+        metrics["epoch_acc"] = metrics["correct_pred"] / metrics["n"]
 
-            batch_loss = loss_fn(model(X_test), y_test)
-            test_loss_epoch += float(batch_loss)
+    wandb.log({"test loss per epoch": metrics["test_loss_epoch"]})
+    wandb.log({"test accuracy per epoch": metrics["epoch_acc"]})
+    print('epoch {}, test loss {}, accuracy {}'.format(epoch + 1, metrics["test_loss_epoch"], metrics["epoch_acc"]))
+    return metrics["epoch_acc"]
 
-            pred_lables_test = helper.predicted_lables(pred_test)
-            n += len(y_test)
-            correct_pred += float((pred_lables_test == y_test).sum())
+# batch and X are not used in this function but are needed for the generic_train_loop
+def test_logger(outputs, loss, batch, X, y_test, metrics):
+    pred = outputs[-1]
+    metrics["test_loss_epoch"] += float(loss)
+    pred_lables_test = helper.predicted_lables(pred)
+    metrics["n"] += len(y_test)
+    metrics["correct_pred"] += float((pred_lables_test == y_test).sum())
 
-        test_loss_epoch /= len(test_dataloader)
-        epoch_acc = correct_pred / n
-
-    wandb.log({"test loss per epoch": test_loss_epoch})
-    wandb.log({"test accuracy per epoch": epoch_acc})
-    print('epoch {}, test loss {}, accuracy {}'.format(epoch + 1, test_loss_epoch, epoch_acc))
-    return test_loss_epoch, epoch_acc
+    return metrics
