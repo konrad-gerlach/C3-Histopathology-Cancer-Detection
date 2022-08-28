@@ -63,6 +63,7 @@ def visualizer_loop(model, loss_fn, optimizer, device, epochs, gradient_accumula
     metrics = dict()
     model.eval()
     for i in range(epochs):
+        show(sample_input)
         wandb.log({"inputs" : [wandb.Image(x) for x in sample_input]})
         X = random_transform(pad_image_channels(sample_input.clamp(0,1)))
         generic_train_loop.train_loop(X=X, y=y, device=device, model=model, logger=logger, metrics=metrics, gradient_accumulation=gradient_accumulation, optimizer=optimizer, loss_fn=loss_fn)
@@ -112,6 +113,7 @@ def show(images):
         f.imshow(torchvision.transforms.ToPILImage()(img))
         f.axes.get_xaxis().set_visible(False)
         f.axes.get_yaxis().set_visible(False)
+    plt.show()
 
 if __name__ == "__main__":
     show(sample((3,3,32,32),'cpu'))
