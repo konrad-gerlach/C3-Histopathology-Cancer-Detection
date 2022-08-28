@@ -37,7 +37,7 @@ def setup(grayscale, good_model):
 
 
 def show_saliencies(images):
-    fig, ax = plt.subplots(5, len(images), figsize=(200,200))
+    fig, ax = plt.subplots(5, len(images), figsize=(100,100))
     for i, image in enumerate(images):
         image_grads = image.grad.data.abs()
         
@@ -117,7 +117,7 @@ def cancer_regions(sal_abs, image):
     surrounding = torch.mul(image.cpu(), cancer_surrounding.cpu())
     surrounding = torch.add(surrounding.cpu(), cancer_surr_color.cpu())
 
-    fig, ax = plt.subplots(1, 4)
+    fig, ax = plt.subplots(1, 4, figsize=(100, 100))
     ax[0].imshow(image.cpu().detach().numpy().transpose(1, 2, 0))
     ax[0].axis('off')
     ax[1].imshow(sal_abs.cpu(), cmap='inferno')
