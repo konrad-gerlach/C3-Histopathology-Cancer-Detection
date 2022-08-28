@@ -89,6 +89,7 @@ def get_data_examples(model,device,loss_fn):
     model = model.to(device)
     model.eval()
     __, test_dl, __ = data.get_dl(config.OPTIMIZER_CONFIG["batch_size"])
+    #results contains the 10 minimum dataset examples as a running minimum
     results = []
     with torch.no_grad():
         for __, (X,y) in tqdm(enumerate(test_dl)):
