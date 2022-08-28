@@ -114,7 +114,7 @@ def run_visualizer():
 def show(images):
     _, figs = plt.subplots(1, len(images), figsize=(200, 200))
     for f, img in zip(figs, images):
-        f.imshow(torchvision.transforms.ToPILImage()(img))
+        f.imshow(torchvision.transforms.ToPILImage()(img.clamp(0,1)))
         f.axes.get_xaxis().set_visible(False)
         f.axes.get_yaxis().set_visible(False)
     plt.show()
