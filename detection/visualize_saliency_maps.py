@@ -31,7 +31,7 @@ def setup(grayscale, good_model):
     # Set the model on Eval Mode
     model.eval()
     # always use the images in same order
-    _, data_loader, _ = data.get_dl(batch_size=1, num_workers=1)
+    _, data_loader, _ = data.get_dl(batch_size=1)
 
     return data_loader, device, model
 
@@ -70,7 +70,7 @@ def show_saliencies(images):
 
         #also log in wandb
         inferno = plt.get_cmap('inferno')
-        wandb.log({"Sal_abs": wandb.Image(inferno(sal_abs))})
+        wandb.log({"Sal_abs": wandb.Image(inferno(sal_abs.cpu()))})
 
 
 
@@ -98,7 +98,7 @@ def cancer_regions(sal_abs, image):
             if sal_abs[i, k] >= value_treshold:
                 cancer_areas[i - off:i + off, k - off:k + off] = 1
 
-    regions = torch.mul(image, cancer_areas)
+    regions = torch.mul(image.cpu(), cancer_areas.cpu())
 
     cancer_surrounding = torch.ones(3, 96, 96)
     cancer_surr_color = torch.zeros(3, 96, 96)
@@ -114,8 +114,8 @@ def cancer_regions(sal_abs, image):
                         cancer_surr_color[0,i,k]=1
 
     
-    surrounding = torch.mul(image, cancer_surrounding)
-    surrounding = torch.add(surrounding, cancer_surr_color)
+    surrounding = torch.mul(image.cpu(), cancer_surrounding.cpu())
+    surrounding = torch.add(surrounding.cpu(), cancer_surr_color.cpu())
 
     fig, ax = plt.subplots(1, 4)
     ax[0].imshow(image.cpu().detach().numpy().transpose(1, 2, 0))
