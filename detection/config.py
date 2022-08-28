@@ -7,23 +7,23 @@ MODEL_CONFIG = dict(
 
 # constructor arguments for model selected with MODEL_CONFIG["model_class"]
 SP_MODEL_CONFIG = dict(
-    conv_dropout=0.1,
+    conv_dropout=0.0,
     fully_dropout=0.5,
     fc_layer_size=200
 )
 
 WANDB_CONFIG = dict(
-    project="histo_cancer",
+    project="histo_cancer2",
     entity="histo-cancer-detection"
 )
 
 TRAINER_CONFIG = dict(
     max_epochs=25,
     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
-    continue_training=True,
+    continue_training=False,
     # if set to true the latest model for MODEL_CONFIG["model_class"] with alias LOAD_CONFIG["alias"] will be
     # downloaded and used for training
-    accuracy_goal=0.97,  # model will be saved once this testing accuracy has been reached
+    accuracy_goal=0.95,  # model will be saved once this testing accuracy has been reached
     gradient_accumulation=1,
     # https://stackoverflow.com/questions/63815311/what-is-the-correct-way-to-implement-gradient-accumulation-in
     # (pytorch approach no 1. was chosen)
@@ -36,7 +36,7 @@ TRAINER_CONFIG = dict(
 OPTIMIZER_CONFIG = dict(
     batch_size=64,
     use_optimizer="adam",
-    lr=0.0000001,
+    lr=0.001,
     weight_decay=0,
     alpha=0.99,  # For RmsProp
     betas=(0.9, 0.999),  # For Adam
@@ -48,7 +48,7 @@ OPTIMIZER_CONFIG = dict(
 
 DATA_CONFIG = dict(
     num_workers=4,
-    train_portion=0.001,
+    train_portion=0.67,
     test_portion=0.33,
     ds_path='datasets/cancer',
     use_cache=False,
