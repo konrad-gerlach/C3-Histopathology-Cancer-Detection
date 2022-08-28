@@ -62,13 +62,16 @@ def visualizer_loop(model, loss_fn, optimizer, device, epochs, gradient_accumula
     y = torch.zeros(1)
     metrics = dict()
     model.eval()
-    fig = fig = plt.figure(figsize=(200, 200))
+    show_step = 100
+    to_show = []
     for i in range(epochs):
+        if i % show_step == 0:
+            to_show.extend(sample_input.clone().detach())
         print(i)
         wandb.log({"inputs" : [wandb.Image(x) for x in sample_input]})
         X = random_transform(pad_image_channels(sample_input.clamp(0,1)))
         generic_train_loop.train_loop(X=X, y=y, device=device, model=model, logger=logger, metrics=metrics, gradient_accumulation=gradient_accumulation, optimizer=optimizer, loss_fn=loss_fn)
-    show(sample_input)
+    show(to_show)
 
 def get_data_examples(model,device,loss_fn):
     model = model.to(device)
