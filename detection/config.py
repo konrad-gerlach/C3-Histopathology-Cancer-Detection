@@ -36,7 +36,7 @@ TRAINER_CONFIG = dict(
 OPTIMIZER_CONFIG = dict(
     batch_size=64,
     use_optimizer="adam",
-    lr=0.01,
+    lr=0.0000001,
     weight_decay=0,
     alpha=0.99,  # For RmsProp
     betas=(0.9, 0.999),  # For Adam
@@ -48,7 +48,7 @@ OPTIMIZER_CONFIG = dict(
 
 DATA_CONFIG = dict(
     num_workers=4,
-    train_portion=0.67,
+    train_portion=0.001,
     test_portion=0.33,
     ds_path='datasets/cancer',
     use_cache=False,
