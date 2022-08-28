@@ -91,7 +91,6 @@ def get_data_examples(model,device,loss_fn):
     full_dl = data.get_full_dl(config.OPTIMIZER_CONFIG["batch_size"])
     #results contains the 10 minimum dataset examples as a running minimum
     results = []
-    smallest = None
     with torch.no_grad():
         for __, (X,y) in tqdm(enumerate(full_dl)):
             X = X.to(device, non_blocking=True)
@@ -100,18 +99,13 @@ def get_data_examples(model,device,loss_fn):
 
             outputs = model.forward_per_layer(X)
             loss = loss_fn(outputs, y)
-            X = X.to("cpu", non_blocking=True)
-            y = y.to("cpu", non_blocking=True)
-            loss = loss.to("cpu", non_blocking=True)
+            X = X.to("cpu")
+            y = y.to("cpu")
+            loss = loss.to("cpu")
             for i in range(len(X)):
-                if smallest is None:
-                    smallest = (X[i].clone().detach(),loss[i].clone().detach(),y[i].clone().detach())
-                if smallest[1]>loss[i].clone().detach():
-                    smallest = (X[i].clone().detach(),loss[i].clone().detach(),y[i].clone().detach())
-                #results.sort(key= lambda img_and_loss_tuple: img_and_loss_tuple[1])
-                #results = results[:10]
-    #results.sort(key= lambda img_and_loss_tuple: img_and_loss_tuple[1])
-    results.append(smallest)
+                results.append((X[i].clone().detach(),loss[i].clone().detach(),y[i].clone().detach()))
+                results.sort(key= lambda img_and_loss_tuple: img_and_loss_tuple[1])
+                results = results[:10]
     wandb.log({"minimzer_images" : [wandb.Image(img_and_loss_tuple[0],caption=("cancer: "+str(img_and_loss_tuple[2].item()))+ " loss: " + str(img_and_loss_tuple[1].item())) for img_and_loss_tuple in results]})
     show([img_and_loss_tuple[0] for img_and_loss_tuple in results],[("cancer: "+str(img_and_loss_tuple[2].item()))+ " loss: " + str(img_and_loss_tuple[1].item()) for img_and_loss_tuple in results] )
 
@@ -138,6 +132,8 @@ def show(images, labels=None):
         labels = ["" for x in images]
 
     _, figs = plt.subplots(1, len(images), figsize=(200, 200))
+    if len(images)==1:
+        figs = [figs]
     for f, img, label in zip(figs, images,labels):
         f.imshow(torchvision.transforms.ToPILImage()(img.clamp(0,1)))
         f.axes.get_xaxis().set_visible(False)
