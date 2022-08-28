@@ -91,6 +91,7 @@ def get_data_examples(model,device,loss_fn):
     full_dl = data.get_full_dl(config.OPTIMIZER_CONFIG["batch_size"])
     #results contains the 10 minimum dataset examples as a running minimum
     results = []
+    smallest = None
     with torch.no_grad():
         for __, (X,y) in tqdm(enumerate(full_dl)):
             X = X.to(device, non_blocking=True)
@@ -103,12 +104,16 @@ def get_data_examples(model,device,loss_fn):
             y = y.to("cpu", non_blocking=True)
             loss = loss.to("cpu", non_blocking=True)
             for i in range(len(X)):
-                results.append((X[i],loss[i],y[i]))
-                results.sort(key= lambda img_and_loss_tuple: img_and_loss_tuple[1])
-                results = results[:10]
-    results.sort(key= lambda img_and_loss_tuple: img_and_loss_tuple[1])
-    wandb.log({"minimzer_images" : [wandb.Image(img_and_loss_tuple[0],caption=("cancer: "+str(img_and_loss_tuple[2].item()))+ " loss: " + str(img_and_loss_tuple[1].item())) for img_and_loss_tuple in results[:10]]})
-    show([img_and_loss_tuple[0] for img_and_loss_tuple in results[:10]])
+                if smallest is None:
+                    smallest = (X[i].clone().detach(),loss[i].clone().detach(),y[i].clone().detach())
+                if smallest[1]>loss[i].clone().detach():
+                    smallest = (X[i].clone().detach(),loss[i].clone().detach(),y[i].clone().detach())
+                #results.sort(key= lambda img_and_loss_tuple: img_and_loss_tuple[1])
+                #results = results[:10]
+    #results.sort(key= lambda img_and_loss_tuple: img_and_loss_tuple[1])
+    results.append(smallest)
+    wandb.log({"minimzer_images" : [wandb.Image(img_and_loss_tuple[0],caption=("cancer: "+str(img_and_loss_tuple[2].item()))+ " loss: " + str(img_and_loss_tuple[1].item())) for img_and_loss_tuple in results]})
+    show([img_and_loss_tuple[0] for img_and_loss_tuple in results],[("cancer: "+str(img_and_loss_tuple[2].item()))+ " loss: " + str(img_and_loss_tuple[1].item()) for img_and_loss_tuple in results] )
 
 def run_visualizer():
     num_epochs = 1000
@@ -126,15 +131,19 @@ def run_visualizer():
     visualize(model, optimizer, config.TRAINER_CONFIG["device"], config.TRAINER_CONFIG["gradient_accumulation"],sample_input, epochs=num_epochs)
     wandb.finish()
 
-def show(images):
+def show(images, labels=None):
     if not config.TRAINER_CONFIG["plot_figures"]:
         return
-    
+    if labels is None:
+        labels = ["" for x in images]
+
     _, figs = plt.subplots(1, len(images), figsize=(200, 200))
-    for f, img in zip(figs, images):
+    for f, img, label in zip(figs, images,labels):
         f.imshow(torchvision.transforms.ToPILImage()(img.clamp(0,1)))
         f.axes.get_xaxis().set_visible(False)
         f.axes.get_yaxis().set_visible(False)
+        f.set_title(label)
+
     plt.show()
 
 if __name__ == "__main__":

@@ -122,7 +122,7 @@ def get_full_ds():
 def get_full_dl(batch_size, pin_memory=True):
     num_workers = config.DATA_CONFIG["num_workers"]
     full_ds = get_full_ds()
-    return DataLoader(full_ds, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
+    return DataLoader(full_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory)
 
 
 def get_dl(batch_size, pin_memory=True):

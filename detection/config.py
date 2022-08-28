@@ -79,5 +79,5 @@ VISUALIZATION_CONFIG = dict(
     minimize = False, #whether to minimize or maximize the activation of the neuron in question
     get_data_examples = True, #whether or not to search for data examples for the neuron within the dataset
     feature_visualization = False, #whether or not to use optimization by visualization
-    force_grayscale_input = True #whether or not to use grayscale sample inputs for feature visualization even though the network to be analyzed supports colour
+    force_grayscale_input = False #whether or not to use grayscale sample inputs for feature visualization even though the network to be analyzed supports colour
 )
