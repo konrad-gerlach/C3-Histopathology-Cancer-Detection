@@ -75,5 +75,6 @@ SWEEP_CONFIG = dict(
 )
 
 VISUALIZATION_CONFIG = dict(
-    minimize = True
+    minimize = True,
+    colour_net_with_grayscale_input = False
 )

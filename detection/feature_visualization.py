@@ -15,7 +15,7 @@ def sample(img_shape,device):
 def generate_initial_sample(img_shape):
     width = img_shape[1]
     height = img_shape[2]
-    if config.DATA_CONFIG["grayscale"]:
+    if config.DATA_CONFIG["grayscale"] or config.VISUALIZATION_CONFIG["force_grayscale_input"]:
         return sample((1,1,width,height),config.TRAINER_CONFIG["device"])
     else:
         return sample((1,3,width,height),config.TRAINER_CONFIG["device"])
@@ -23,7 +23,7 @@ def generate_initial_sample(img_shape):
 
 #conversion from single channel grayscale to three channel grayscale
 def pad_image_channels(image):
-    if config.DATA_CONFIG["grayscale"]:
+    if config.DATA_CONFIG["grayscale"] or config.VISUALIZATION_CONFIG["force_grayscale_input"]:
         return image.repeat(1,3,1,1)
     return image
 
