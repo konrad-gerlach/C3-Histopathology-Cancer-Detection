@@ -103,6 +103,8 @@ def get_data_examples(model,device,loss_fn):
             loss = loss.to("cpu", non_blocking=True)
             for i in range(len(X)):
                 results.append((X[i],loss[i],y[i]))
+                results.sort(key= lambda img_and_loss_tuple: img_and_loss_tuple[1])
+                results = results[:10]
     results.sort(key= lambda img_and_loss_tuple: img_and_loss_tuple[1])
     wandb.log({"minimzer_images" : [wandb.Image(img_and_loss_tuple[0],caption=("cancer: "+str(img_and_loss_tuple[2].item()))+ " loss: " + str(img_and_loss_tuple[1].item())) for img_and_loss_tuple in results[:10]]})
     show([img_and_loss_tuple[0] for img_and_loss_tuple in results[:10]])
