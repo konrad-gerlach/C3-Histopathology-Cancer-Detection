@@ -10,8 +10,6 @@ import os
 import pandas as pd
 import config
 import helper
-YOUR_KAGGLE_USERNAME = ''
-YOUR_KAGGLE_KEY = ''
 
 
 # https://lindevs.com/download-dataset-from-kaggle-using-api-and-python/
@@ -34,9 +32,6 @@ def unzip_competition_files(competition, path):
 
 
 def load_competition_from_kaggle(competition, path):
-    os.environ['KAGGLE_USERNAME'] = YOUR_KAGGLE_USERNAME
-    os.environ['KAGGLE_KEY'] = YOUR_KAGGLE_KEY
-
     from kaggle.api.kaggle_api_extended import KaggleApi
     api = KaggleApi()
     
