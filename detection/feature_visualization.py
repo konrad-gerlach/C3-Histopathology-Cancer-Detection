@@ -62,11 +62,13 @@ def visualizer_loop(model, loss_fn, optimizer, device, epochs, gradient_accumula
     y = torch.zeros(1)
     metrics = dict()
     model.eval()
+    fig = fig = plt.figure(figsize=(200, 200))
     for i in range(epochs):
-        show(sample_input)
+        print(i)
         wandb.log({"inputs" : [wandb.Image(x) for x in sample_input]})
         X = random_transform(pad_image_channels(sample_input.clamp(0,1)))
         generic_train_loop.train_loop(X=X, y=y, device=device, model=model, logger=logger, metrics=metrics, gradient_accumulation=gradient_accumulation, optimizer=optimizer, loss_fn=loss_fn)
+    show(sample_input)
 
 def get_data_examples(model,device,loss_fn):
     model = model.to(device)
@@ -96,14 +98,13 @@ def run_visualizer():
 
     _, _, img_shape = data.get_dl(config.OPTIMIZER_CONFIG["batch_size"])
     sample_input = generate_initial_sample(img_shape)
-    optimizer = helper.choose_optimizer(config.OPTIMIZER_CONFIG, model.parameters(), learning_rate=config.OPTIMIZER_CONFIG["lr"])
+    optimizer = helper.choose_optimizer(config.OPTIMIZER_CONFIG, [sample_input], learning_rate=config.OPTIMIZER_CONFIG["lr"])
     logging_config = helper.log_metadata(optimizer)
 
     wandb.config.update(logging_config)
     wandb.watch(model, criterion=None, log="gradients", log_freq=1000, idx=None, log_graph=(True))
 
     visualize(model, optimizer, config.TRAINER_CONFIG["device"], config.TRAINER_CONFIG["gradient_accumulation"],sample_input, epochs=num_epochs)
-    
     wandb.finish()
 
 # prolly wont work in colab
@@ -116,5 +117,4 @@ def show(images):
     plt.show()
 
 if __name__ == "__main__":
-    show(sample((3,3,32,32),'cpu'))
-    plt.show()
+    run_visualizer()
