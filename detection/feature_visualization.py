@@ -7,6 +7,7 @@ import config
 import helper
 import generic_train_loop
 import data
+from tqdm import tqdm
 
 def sample(img_shape,device):
     return torch.rand(img_shape,device=device,requires_grad=True)
@@ -38,6 +39,7 @@ def visualizer_loss_fn(outputs, y):
     loss = torch.zeros(1,device=layer.device)
     for i in range(len(layer)):
         loss += layer[i,i]
+
     if not config.VISUALIZATION_CONFIG['minimize']:
         return -loss
     return loss
@@ -48,11 +50,18 @@ def data_example_loss_fn(outputs,y):
     loss = torch.zeros(len(layer),device=layer.device)
     for i in range(len(layer)):
         loss[i] += layer[i][0]
+
+    if not config.VISUALIZATION_CONFIG['minimize']:
+        return -loss
     return loss
 
 def visualize(model, optimizer, device, gradient_accumulation,sample_input, epochs=5):
-    loss_fn = visualizer_loss_fn
-    visualizer_loop(model, loss_fn, optimizer, device, epochs, gradient_accumulation,sample_input)
+    if config.VISUALIZATION_CONFIG["feature_visualization"]:
+        loss_fn = visualizer_loss_fn
+        visualizer_loop(model, loss_fn, optimizer, device, epochs, gradient_accumulation,sample_input)
+    if config.VISUALIZATION_CONFIG["get_data_examples"]:
+        loss_fn = data_example_loss_fn
+        get_data_examples(model,device,loss_fn)
 
 def logger(outputs,loss,batch,X,y,metrics):
     X = torch.clamp(X,0,1)
@@ -66,7 +75,7 @@ def visualizer_loop(model, loss_fn, optimizer, device, epochs, gradient_accumula
     model.eval()
     show_step = 2
     to_show = []
-    for i in range(epochs):
+    for i in tqdm(range (epochs), desc="visualizing..."):
         if i == show_step:
             show_step *= 2
             to_show.extend(sample_input.clone().detach())
@@ -82,7 +91,7 @@ def get_data_examples(model,device,loss_fn):
     __, test_dl, __ = data.get_dl(config.OPTIMIZER_CONFIG["batch_size"])
     results = []
     with torch.no_grad():
-        for __, (X,y) in enumerate(test_dl):
+        for __, (X,y) in tqdm(enumerate(test_dl)):
             X = X.to(device, non_blocking=True)
             y = y.to(device, non_blocking=True)
             y = y.view(-1, 1).to(torch.float)
@@ -96,6 +105,7 @@ def get_data_examples(model,device,loss_fn):
                 results.append((X[i],loss[i],y[i]))
     results.sort(key= lambda img_and_loss_tuple: img_and_loss_tuple[1])
     wandb.log({"minimzer_images" : [wandb.Image(img_and_loss_tuple[0],caption=("cancer: "+str(img_and_loss_tuple[2].item()))+ " loss: " + str(img_and_loss_tuple[1].item())) for img_and_loss_tuple in results[:10]]})
+    show([img_and_loss_tuple[0] for img_and_loss_tuple in results[:10]])
 
 def run_visualizer():
     num_epochs = 1000
@@ -114,6 +124,9 @@ def run_visualizer():
     wandb.finish()
 
 def show(images):
+    if not config.TRAINER_CONFIG["plot_figures"]:
+        return
+    
     _, figs = plt.subplots(1, len(images), figsize=(200, 200))
     for f, img in zip(figs, images):
         f.imshow(torchvision.transforms.ToPILImage()(img.clamp(0,1)))

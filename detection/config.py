@@ -27,7 +27,8 @@ TRAINER_CONFIG = dict(
     gradient_accumulation=1,
     # https://stackoverflow.com/questions/63815311/what-is-the-correct-way-to-implement-gradient-accumulation-in
     # (pytorch approach no 1. was chosen)
-    mode = "training" #supports training,sweeps,feature_visualization, saliency_maps
+    mode = "training", #supports training,sweeps,feature_visualization, saliency_maps
+    plot_figures = True #can be used to disable matplotlib plotting
 )
 
 # supports adam, rmsprop, sgd (with weight decay and momentum)
@@ -75,6 +76,8 @@ SWEEP_CONFIG = dict(
 )
 
 VISUALIZATION_CONFIG = dict(
-    minimize = True,
-    colour_net_with_grayscale_input = False
+    minimize = False, #whether to minimize or maximize the activation of the neuron in question
+    get_data_examples = True, #whether or not to search for data examples for the neuron within the dataset
+    feature_visualization = False, #whether or not to use optimization by visualization
+    force_grayscale_input = True #whether or not to use grayscale sample inputs for feature visualization even though the network to be analyzed supports colour
 )

@@ -131,6 +131,8 @@ def get_dl(batch_size, pin_memory=True):
 
 # prolly wont work in colab
 def show_images(images, labels):
+    if not config.TRAINER_CONFIG["plot_figures"]:
+        return
     _, figs = plt.subplots(1, len(images), figsize=(200, 200))
     for f, img, lbl in zip(figs, images, labels):
         f.imshow(torchvision.transforms.ToPILImage()(img))
