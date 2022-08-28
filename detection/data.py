@@ -91,16 +91,7 @@ class CancerDataset(VisionDataset):
 
 
 def get_ds():
-    load_cancer_ds()
-    uncomposed_transforms = [torchvision.transforms.ToTensor(), torchvision.transforms.Resize([96, 96])]
-    if config.DATA_CONFIG["grayscale"]:
-        uncomposed_transforms.append(torchvision.transforms.Grayscale(3))
-    transforms = torchvision.transforms.Compose(uncomposed_transforms)
-    path = config.DATA_CONFIG["ds_path"]
-    use_cache = config.DATA_CONFIG["use_cache"]
-    full_ds = CancerDataset(os.path.join(path, "train"), os.path.join(path, "train_labels.csv"), transforms)
-    if use_cache:
-        full_ds = CachingDataset(full_ds)
+    full_ds = get_full_ds()
     train_ds, test_ds = split_ds(full_ds)
     return train_ds, test_ds
 
@@ -114,6 +105,24 @@ def split_ds(full_ds):
     test_ds, remainder_ds = torch.utils.data.random_split(remainder_ds, [test_size, remainder - test_size],
                                                           generator=torch.Generator().manual_seed(42))
     return train_ds, test_ds
+
+def get_full_ds():
+    load_cancer_ds()
+    uncomposed_transforms = [torchvision.transforms.ToTensor(), torchvision.transforms.Resize([96, 96])]
+    if config.DATA_CONFIG["grayscale"]:
+        uncomposed_transforms.append(torchvision.transforms.Grayscale(3))
+    transforms = torchvision.transforms.Compose(uncomposed_transforms)
+    path = config.DATA_CONFIG["ds_path"]
+    use_cache = config.DATA_CONFIG["use_cache"]
+    full_ds = CancerDataset(os.path.join(path, "train"), os.path.join(path, "train_labels.csv"), transforms)
+    if use_cache:
+        full_ds = CachingDataset(full_ds)
+    return full_ds
+
+def get_full_dl(batch_size, pin_memory=True):
+    num_workers = config.DATA_CONFIG["num_workers"]
+    full_ds = get_full_ds()
+    train_dl = DataLoader(full_ds, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
 
 
 def get_dl(batch_size, pin_memory=True):

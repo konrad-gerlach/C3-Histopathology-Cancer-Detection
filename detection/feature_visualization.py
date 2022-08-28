@@ -88,11 +88,11 @@ def visualizer_loop(model, loss_fn, optimizer, device, epochs, gradient_accumula
 def get_data_examples(model,device,loss_fn):
     model = model.to(device)
     model.eval()
-    __, test_dl, __ = data.get_dl(config.OPTIMIZER_CONFIG["batch_size"])
+    full_dl = data.get_full_dl(config.OPTIMIZER_CONFIG["batch_size"])
     #results contains the 10 minimum dataset examples as a running minimum
     results = []
     with torch.no_grad():
-        for __, (X,y) in tqdm(enumerate(test_dl)):
+        for __, (X,y) in tqdm(enumerate(full_dl)):
             X = X.to(device, non_blocking=True)
             y = y.to(device, non_blocking=True)
             y = y.view(-1, 1).to(torch.float)
