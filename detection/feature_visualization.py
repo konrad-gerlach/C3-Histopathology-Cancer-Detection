@@ -38,6 +38,8 @@ def visualizer_loss_fn(outputs, y):
     loss = torch.zeros(1,device=layer.device)
     for i in range(len(layer)):
         loss += layer[i,i]
+    if not config.VISUALIZATION_CONFIG['minimize']:
+        return -loss
     return loss
 
 #loss function for a batch of multiple dataset images minimizing the same loss function
@@ -62,15 +64,16 @@ def visualizer_loop(model, loss_fn, optimizer, device, epochs, gradient_accumula
     y = torch.zeros(1)
     metrics = dict()
     model.eval()
-    show_step = 100
+    show_step = 2
     to_show = []
     for i in range(epochs):
-        if i % show_step == 0:
+        if i == show_step:
+            show_step *= 2
             to_show.extend(sample_input.clone().detach())
-        print(i)
         wandb.log({"inputs" : [wandb.Image(x) for x in sample_input]})
         X = random_transform(pad_image_channels(sample_input.clamp(0,1)))
         generic_train_loop.train_loop(X=X, y=y, device=device, model=model, logger=logger, metrics=metrics, gradient_accumulation=gradient_accumulation, optimizer=optimizer, loss_fn=loss_fn)
+    to_show.extend(sample_input.clone().detach())
     show(to_show)
 
 def get_data_examples(model,device,loss_fn):
@@ -110,7 +113,6 @@ def run_visualizer():
     visualize(model, optimizer, config.TRAINER_CONFIG["device"], config.TRAINER_CONFIG["gradient_accumulation"],sample_input, epochs=num_epochs)
     wandb.finish()
 
-# prolly wont work in colab
 def show(images):
     _, figs = plt.subplots(1, len(images), figsize=(200, 200))
     for f, img in zip(figs, images):

@@ -13,7 +13,7 @@ SP_MODEL_CONFIG = dict(
 )
 
 WANDB_CONFIG = dict(
-    project="histo_cancer2",
+    project="histo_cancer",
     entity="histo-cancer-detection"
 )
 
@@ -72,4 +72,8 @@ SWEEP_CONFIG = dict(
     test_portion=0.1,
     epochs=10,
     runs=1000
+)
+
+VISUALIZATION_CONFIG = dict(
+    minimize = True
 )

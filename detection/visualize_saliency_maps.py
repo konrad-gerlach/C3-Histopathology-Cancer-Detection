@@ -37,7 +37,7 @@ def setup(grayscale, good_model):
 
 
 def show_saliencies(images):
-    fig, ax = plt.subplots(5, len(images))
+    fig, ax = plt.subplots(5, len(images), figsize=(200,200))
     for i, image in enumerate(images):
         image_grads = image.grad.data.abs()
         
