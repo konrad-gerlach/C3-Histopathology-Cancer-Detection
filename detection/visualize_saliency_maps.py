@@ -69,12 +69,12 @@ def show_saliencies(images):
         ax[4, i].axis('off')
 
         #also log in wandb
-        inferno = plt.get_cmap('inferno')
-        wandb.log({"Sal_abs": wandb.Image(inferno(sal_abs.cpu()))})
+        #inferno = plt.get_cmap('inferno')
+        #wandb.log({"Sal_abs": wandb.Image(inferno(sal_abs.cpu()))})
 
 
 
-    wandb.log({"Cancer images with saliency maps": plt})
+    #wandb.log({"Cancer images with saliency maps": plt})
 
     plt.tight_layout(pad=0.7)
     fig.suptitle('Images of cancer and corresponding saliency maps')
