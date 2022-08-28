@@ -185,4 +185,5 @@ def run_saliency_visualizer():
 
 
 if __name__ == "__main__":
+    helper.define_dataset_location()
     run_saliency_visualizer()

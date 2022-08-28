@@ -122,4 +122,5 @@ def show(images):
     plt.show()
 
 if __name__ == "__main__":
+    helper.define_dataset_location()
     run_visualizer()

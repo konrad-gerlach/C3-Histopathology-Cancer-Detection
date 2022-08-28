@@ -9,6 +9,7 @@ from skimage import io
 import os
 import pandas as pd
 import config
+import helper
 YOUR_KAGGLE_USERNAME = ''
 YOUR_KAGGLE_KEY = ''
 
@@ -143,6 +144,7 @@ def show_images(images, labels):
 
 
 if __name__ == "__main__":
+    helper.define_dataset_location()
     # show some example images
     train_dataloader, test_dataloader, img_shape = get_dl(batch_size=4)
 
