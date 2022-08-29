@@ -53,7 +53,7 @@ DATA_CONFIG = dict(
     test_portion=0.33,
     ds_path='datasets/cancer',
     use_cache=False,
-    grayscale=False
+    grayscale=False #trains and visualizes the network using dataset images converted to grayscale
 )
 
 #set the alias accordingly for continuos training

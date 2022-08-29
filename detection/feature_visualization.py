@@ -43,7 +43,7 @@ def visualizer_loss_fn(outputs, y):
             return -loss
         return loss
     elif config.VISUALIZATION_CONFIG["mode"] == "deep_dream":
-        return torch.linalg.norm(layer[0])
+        return -torch.linalg.norm(layer[0])
     else:
         raise UnsupportedOperation("unknown mode "+ str(config.VISUALIZATION_CONFIG["mode"]))
 
@@ -137,7 +137,7 @@ def show(images, labels=None):
     if labels is None:
         labels = ["" for x in images]
 
-    _, figs = plt.subplots(1, len(images), figsize=(200, 200))
+    _, figs = plt.subplots(1, len(images), figsize=(50, 50))
     if len(images)==1:
         figs = [figs]
     for f, img, label in zip(figs, images,labels):
