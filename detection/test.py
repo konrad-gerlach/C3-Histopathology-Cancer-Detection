@@ -40,7 +40,7 @@ def test_loop(model, test_dataloader, loss_fn, device, epoch):
 
 
 if __name__ == "__main__":
-    config.LOAD_CONFIG["alias"] = "usable-colored"
+    config.LOAD_CONFIG["alias"] = "usable-colored-with-metrics"
     config.DATA_CONFIG["grayscale"] = False
     wandb_config = config.WANDB_CONFIG
     job_type = "precision-recall"
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     with torch.no_grad():
         import csv
 
-        f = open('./submission2.csv', 'w')
+        f = open('./submission3.csv', 'w')
 
         writer = csv.writer(f)
         header = ['id', 'label']
