@@ -1,3 +1,4 @@
+from io import UnsupportedOperation
 from tkinter.tix import X_REGION
 import torch
 from matplotlib import pyplot as plt
@@ -33,26 +34,25 @@ def random_transform(inputs):
     transformed = torchvision.transforms.RandomAffine(15,translate=(0.1,0.1),scale=(0.8,1.2))(transformed)
     return transformed
 
-#loss function for a batch of multiple images to be optimized to minimize loss functions for multiple neurons
+#loss function for a batch of a single image to be optimized to minimize the loss function for a single target unit
 def visualizer_loss_fn(outputs, y):
-    layer = outputs[-1]
-    loss = torch.zeros(1,device=layer.device)
-    for i in range(len(layer)):
-        loss += layer[i,i]
-
-    if not config.VISUALIZATION_CONFIG['minimize']:
-        return -loss
-    return loss
+    layer = outputs[config.VISUALIZATION_CONFIG["target_layer"]]
+    if config.VISUALIZATION_CONFIG["mode"] == "unit":
+        loss = layer[0,config.VISUALIZATION_CONFIG["unit_in_question"]].sum()
+        if not config.VISUALIZATION_CONFIG['minimize']:
+            return -loss
+        return loss
+    elif config.VISUALIZATION_CONFIG["mode"] == "deep_dream":
+        return torch.linalg.norm(layer[0])
+    else:
+        raise UnsupportedOperation("unknown mode "+ str(config.VISUALIZATION_CONFIG["mode"]))
 
 #loss function for a batch of multiple dataset images minimizing the same loss function
 def data_example_loss_fn(outputs,y):
-    layer = outputs[-1]
+    layer = outputs[config.VISUALIZATION_CONFIG["target_layer"]]
     loss = torch.zeros(len(layer),device=layer.device)
     for i in range(len(layer)):
-        loss[i] += layer[i][2]
-
-    if not config.VISUALIZATION_CONFIG['minimize']:
-        return -loss
+        loss[i] += visualizer_loss_fn(outputs[:,i])
     return loss
 
 def visualize(model, optimizer, device, gradient_accumulation,sample_input, epochs=5):
