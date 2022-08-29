@@ -46,7 +46,7 @@ def visualizer_loss_fn(outputs, y):
 
 #loss function for a batch of multiple dataset images minimizing the same loss function
 def data_example_loss_fn(outputs,y):
-    layer = outputs[-9]
+    layer = outputs[-1]
     loss = torch.zeros(len(layer),device=layer.device)
     for i in range(len(layer)):
         loss[i] += layer[i][2]
