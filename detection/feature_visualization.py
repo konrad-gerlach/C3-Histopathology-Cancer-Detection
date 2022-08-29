@@ -46,10 +46,10 @@ def visualizer_loss_fn(outputs, y):
 
 #loss function for a batch of multiple dataset images minimizing the same loss function
 def data_example_loss_fn(outputs,y):
-    layer = outputs[-1]
+    layer = outputs[-9]
     loss = torch.zeros(len(layer),device=layer.device)
     for i in range(len(layer)):
-        loss[i] += layer[i][0]
+        loss[i] += layer[i][2]
 
     if not config.VISUALIZATION_CONFIG['minimize']:
         return -loss
@@ -75,15 +75,21 @@ def visualizer_loop(model, loss_fn, optimizer, device, epochs, gradient_accumula
     model.eval()
     show_step = 2
     to_show = []
+    labels = []
     for i in tqdm(range (epochs), desc="visualizing..."):
         if i == show_step:
             show_step *= 2
             to_show.extend(sample_input.clone().detach())
+            for j in range(len(sample_input)):
+                labels.append(f"image {j} step {i}")
         wandb.log({"inputs" : [wandb.Image(x) for x in sample_input]})
         X = random_transform(pad_image_channels(sample_input.clamp(0,1)))
         generic_train_loop.train_loop(X=X, y=y, device=device, model=model, logger=logger, metrics=metrics, gradient_accumulation=gradient_accumulation, optimizer=optimizer, loss_fn=loss_fn)
     to_show.extend(sample_input.clone().detach())
-    show(to_show)
+    for j in range(len(sample_input)):
+            labels.append(f"final image {j} step {i}")
+    show(to_show,labels=labels)
+
 
 def get_data_examples(model,device,loss_fn):
     model = model.to(device)
