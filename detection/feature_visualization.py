@@ -52,7 +52,7 @@ def data_example_loss_fn(outputs,y):
     layer = outputs[config.VISUALIZATION_CONFIG["target_layer"]]
     loss = torch.zeros(len(layer),device=layer.device)
     for i in range(len(layer)):
-        loss[i] += visualizer_loss_fn(outputs[:,i])
+        loss[i] += visualizer_loss_fn([layer.index_select(0,torch.tensor([i],device = config.TRAINER_CONFIG["device"])) for layer in outputs],y)
     return loss
 
 def visualize(model, optimizer, device, gradient_accumulation,sample_input, epochs=5):

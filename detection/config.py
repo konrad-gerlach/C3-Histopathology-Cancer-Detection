@@ -77,8 +77,8 @@ SWEEP_CONFIG = dict(
 
 VISUALIZATION_CONFIG = dict(
     minimize = False, #whether to minimize or maximize the activation of the neuron in question; only works for unit mode
-    get_data_examples = False, #whether or not to search for data examples for the neuron within the dataset
-    feature_visualization = True, #whether or not to use optimization by visualization
+    get_data_examples = True, #whether or not to search for data examples for the neuron within the dataset
+    feature_visualization = False, #whether or not to use optimization by visualization
     force_grayscale_input = False, #whether or not to use grayscale sample inputs for feature visualization even though the network to be analyzed supports colour
     mode = "unit", #supports deep_dream and unit (either channel or neuron depending on the layer)
     target_layer = -1, #index of the layer to be visualized for dataset_examples and feature visualization
