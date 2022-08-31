@@ -22,7 +22,7 @@ TRAINER_CONFIG = dict(
     device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
     continue_training=True,
     # if set to true the latest model for MODEL_CONFIG["model_class"] with alias LOAD_CONFIG["alias"] will be
-    # downloaded and used for training
+    # downloaded and used for training; WARNING: Be careful to properly seed the randomness used for splitting the dataset as otherwise the model will be tested on former training data
     accuracy_goal=0.97,  # model will be saved once this testing accuracy has been reached
     gradient_accumulation=1,
     # https://stackoverflow.com/questions/63815311/what-is-the-correct-way-to-implement-gradient-accumulation-in
