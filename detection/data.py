@@ -119,13 +119,13 @@ def get_full_ds():
         full_ds = CachingDataset(full_ds)
     return full_ds
 
-def get_full_dl(batch_size, pin_memory=True):
+def get_full_dl(batch_size, pin_memory=config.DATA_CONFIG["pin_memory"]):
     num_workers = config.DATA_CONFIG["num_workers"]
     full_ds = get_full_ds()
     return DataLoader(full_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory)
 
 
-def get_dl(batch_size, pin_memory=True):
+def get_dl(batch_size, pin_memory=config.DATA_CONFIG["pin_memory"]):
     num_workers = config.DATA_CONFIG["num_workers"]
     train_ds, test_ds = get_ds()
     img_shape = train_ds[0][0].shape

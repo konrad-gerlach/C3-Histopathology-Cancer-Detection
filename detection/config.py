@@ -49,6 +49,7 @@ OPTIMIZER_CONFIG = dict(
 
 DATA_CONFIG = dict(
     num_workers=4,
+    pin_memory=False,
     train_portion=0.67,
     test_portion=0.33,
     ds_path='datasets/cancer',
