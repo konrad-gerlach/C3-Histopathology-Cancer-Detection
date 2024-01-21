@@ -11,12 +11,41 @@ import pandas as pd
 import config
 import helper
 
-
 # https://lindevs.com/download-dataset-from-kaggle-using-api-and-python/
 # https://www.kaggle.com/docs/api
 # https://github.com/Kaggle/kaggle-api/blob/master/kaggle/api/kaggle_api_extended.py
-
 def unzip_competition_files(competition, path):
+
+    #
+    # Copyright 2024 Kaggle Inc
+    #
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+    # You may obtain a copy of the License at
+    #
+    #      http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
+
+    #!/usr/bin/python
+    #
+    # Copyright 2019 Kaggle Inc
+    #
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+    # You may obtain a copy of the License at
+    #
+    #      http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
     outfile = os.path.join(path, competition + '.zip')
     try:
         with zipfile.ZipFile(outfile) as z:
