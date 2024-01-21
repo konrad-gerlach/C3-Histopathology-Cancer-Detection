@@ -97,7 +97,7 @@ class LeNet(Model):
             nn.Linear(84, 1)
         ]
 
-
+# inspired by: https://blog.ineuron.ai/AlexNet-CNN-architecture-With-Implementation-in-Keras-Q4strWr4iZ
 class Alex_Net(Model):
 
     def get_layers(self):
