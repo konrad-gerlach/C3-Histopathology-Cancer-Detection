@@ -3,20 +3,20 @@ You can find our Git repository at: https://github.com/konrad-gerlach/C3-Histopa
 Our data source is: https://www.kaggle.com/competitions/histopathologic-cancer-detection/data .
 Our code contains links to articles relevant to understanding certain sections.
 List of referenced and used resources:
-https://stackoverflow.com/questions/63815311/what-is-the-correct-way-to-implement-gradient-accumulation-in
-https://pytorch.org/docs/stable/optim.html
-https://lindevs.com/download-dataset-from-kaggle-using-api-and-python/
-https://www.kaggle.com/docs/api
-https://github.com/Kaggle/kaggle-api/blob/master/kaggle/api/kaggle_api_extended.py
-https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
-https://en.wikipedia.org/wiki/Precision_and_recall
-https://towardsdatascience.com/saliency-map-using-pytorch-68270fe45e80
-https://towardsdatascience.com/saliency-map-using-pytorch-68270fe45e80
+* https://stackoverflow.com/questions/63815311/what-is-the-correct-way-to-implement-gradient-accumulation-in
+* https://pytorch.org/docs/stable/optim.html
+* https://lindevs.com/download-dataset-from-kaggle-using-api-and-python/
+* https://www.kaggle.com/docs/api
+* https://github.com/Kaggle/kaggle-api/blob/master/kaggle/api/kaggle_api_extended.py
+* https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
+* https://en.wikipedia.org/wiki/Precision_and_recall
+* https://towardsdatascience.com/saliency-map-using-pytorch-68270fe45e80
+* https://towardsdatascience.com/saliency-map-using-pytorch-68270fe45e80
 
 Our models can be downloaded from:
 https://www.dropbox.com/sh/898sa4puz1bk2xl/AAAyenjUrHw6T48X-9BkBtZJa?dl=0
 There are three models:
-We used one model for the coulour visualizations contained in our Report (colour net), another model - with identical architecture and trained with the same hyperparameters - was used to report the metrics (AUC score, precision, recall, specificity, F1 score) (metric net) and a third model - with the same architecture as the previous two - was used for the grayscale visualization (grayscale net). All of them use the Big-K (Big-Konrad) architecture. Apart from the grayscale net having used a learning rate of 0.01 instead of 0.001 all models were trained using the same hyperparameters and architecture. Both colour models achieved an accuracy of 95%.
+We used one model for the colour visualizations contained in our Report (colour net), another model - with identical architecture and trained with the same hyperparameters - was used to report the metrics (AUC score, precision, recall, specificity, F1 score) (metric net) and a third model - with the same architecture as the previous two - was used for the grayscale visualization (grayscale net). All of them use the Big-K (Big-Konrad) architecture. Apart from the grayscale net having used a learning rate of 0.01 instead of 0.001 all models were trained using the same hyperparameters and architecture. Both colour models achieved an accuracy of 95%.
 
 # Setup
 create virtual python environment in a desired directory - execute:
