@@ -1,3 +1,4 @@
+A revision to the report has been added on 6th of April 2024 and can be found in the file report_revision_2024_04_06.pdf .
 # C3-Histopathology-Cancer-Detection
 You can find our Git repository at: https://github.com/konrad-gerlach/C3-Histopathology-Cancer-Detection .
 Our data source is: https://www.kaggle.com/competitions/histopathologic-cancer-detection/data .
