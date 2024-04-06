@@ -16,6 +16,7 @@ import helper
 # https://github.com/Kaggle/kaggle-api/blob/master/kaggle/api/kaggle_api_extended.py
 def unzip_competition_files(competition, path):
 
+    #the code below has been slightly adapted from the version accessed 6.4.2024 available under https://github.com/Kaggle/kaggle-api/blob/master/kaggle/api/kaggle_api_extended.py 
     #
     # Copyright 2024 Kaggle Inc
     #
